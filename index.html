@@ -26,11 +26,28 @@ section[hidden]{display:none!important}.pill{display:inline-block;padding:4px 8p
 @media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}}
 @media(max-width:420px){main{padding:9px}.metric{font-size:18px}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr 1fr}}
 @media print{header,.tabs,button,form,.noprint{display:none!important}body{background:white}main{max-width:none;padding:0}.card{break-inside:avoid;border:0}}
+.authbox{max-width:460px;margin:35px auto;background:white;border:1px solid var(--line);border-radius:14px;padding:20px}
+.authbox h2{margin-top:0;color:var(--g)}
+#appContent[hidden],#loginPanel[hidden]{display:none!important}
+.readonly-note{background:#eaf2ed;border:1px solid #b9d1c2;color:#174b3a;padding:10px;border-radius:8px;margin-bottom:12px;font-size:13px}
 </style>
 </head>
 <body>
 <header><div style="max-width:1100px;margin:auto"><h1>AMOAKO BUILDING MANAGER</h1><p>Construction accounts · Materials · Workmanship · Inventory · Cash flow · Ghana cedi (GH₵)</p></div></header>
 <main>
+<div id="loginPanel" class="authbox">
+ <h2>Secure sign in</h2>
+ <p class="muted">Sign in to access your construction records stored on Firebase.</p>
+ <form id="loginForm">
+  <label>Email address</label><input id="loginEmail" type="email" autocomplete="username" required>
+  <label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required>
+  <button class="primary full" id="loginButton">Sign in</button>
+ </form>
+ <p id="authMessage" class="small" aria-live="polite">Use the administrator account you created in Firebase Authentication.</p>
+</div>
+<div id="appContent" hidden>
+<div id="readonlyNotice" class="readonly-note" hidden>You are signed in as a viewer. You can view and export records, but cannot make changes.</div>
+<div class="card noprint"><div class="row"><span id="signedInAs" class="small"></span><button id="logoutButton">Sign out</button></div></div>
 <div class="card">
  <div class="row"><b>PROJECT CONTROL</b><button id="addProject">＋ Add separate project</button></div>
  <div class="two">
@@ -99,7 +116,6 @@ section[hidden]{display:none!important}.pill{display:inline-block;padding:4px 8p
   <button class="primary full">Save material purchase</button>
  </form>
 </section>
-
 <section id="labour" class="card" hidden>
  <h2>Workmanship / labour payment</h2><p class="muted">Wall workmanship and main-building workmanship remain separate.</p>
  <form id="labourForm">
@@ -202,10 +218,114 @@ section[hidden]{display:none!important}.pill{display:inline-block;padding:4px 8p
   <button id="pdf" class="primary">Print / Save PDF report</button><button id="csv">Export CSV</button><button id="backup">Download full backup</button>
  </div>
  <label>Restore from backup (replaces current records)</label><input id="restore" type="file" accept="application/json">
- <p class="small" id="message" aria-live="polite">Records are saved on this device. Download backups regularly and before changing phones or clearing browser data.</p>
+ <p class="small" id="message" aria-live="polite">Sign in to synchronise records with Firebase. Keep regular JSON backups as an extra safeguard.</p>
+</div>
 </div>
 </main>
+ <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+(()=>{'use strict';
+const firebaseConfig={
+ apiKey:"AIzaSyBAZV2oIOyaxKFfiXzFBB2MRvMf6q63qrg",
+ authDomain:"amoako-building-manager.firebaseapp.com",
+ projectId:"amoako-building-manager",
+ storageBucket:"amoako-building-manager.firebasestorage.app",
+ messagingSenderId:"565471875198",
+ appId:"1:565471875198:web:7ce6becf312a8cbf6f482f"
+};
+const ADMIN_UID="BEL9AWNN9bVRVyeV7NpNDDJOsOA3";
+const COLLECTION="buildingManagerProjects";
+let auth,db,role=null,unsubscribe=null,ready=false,readOnlyObserver=null;
+const el=id=>document.getElementById(id);
+function message(t){el('authMessage').textContent=t;}
+function showLogin(t){el('loginPanel').hidden=false;el('appContent').hidden=true;if(t)message(t);}
+function setReadOnly(isViewer){
+ if(readOnlyObserver){readOnlyObserver.disconnect();readOnlyObserver=null;}
+ el('readonlyNotice').hidden=!isViewer;
+ document.querySelectorAll('#appContent form').forEach(x=>x.hidden=isViewer);
+ ['addProject','renameProject','setBudget'].forEach(id=>{if(el(id))el(id).hidden=isViewer});
+ document.querySelectorAll('#appContent [data-del-record],#appContent [data-del-invest]').forEach(x=>x.hidden=isViewer);
+ readOnlyObserver=new MutationObserver(()=>{
+  document.querySelectorAll('#appContent [data-del-record],#appContent [data-del-invest]').forEach(x=>x.hidden=isViewer);
+  document.querySelectorAll('#progressList input[type=range]').forEach(x=>x.disabled=isViewer);
+ });
+ readOnlyObserver.observe(el('appContent'),{childList:true,subtree:true});
+ document.querySelectorAll('#progressList input[type=range]').forEach(x=>x.disabled=isViewer);
+ el('restore').parentElement.querySelector('label').hidden=isViewer;
+ el('restore').hidden=isViewer;
+}
+function stopListener(){if(unsubscribe){unsubscribe();unsubscribe=null;}}
+async function startCloud(user){
+ const isAdmin=user.uid===ADMIN_UID;
+ let access=null;
+ if(!isAdmin){
+  const a=await db.collection('buildingManagerAccess').doc(user.uid).get();
+  access=a.exists?a.data():null;
+  if(!access||access.role!=='viewer')throw new Error('This account has not been authorised to view the building records.');
+ }
+ role=isAdmin?'admin':'viewer';
+ const snap=await db.collection(COLLECTION).get();
+ if(snap.empty){
+  if(!isAdmin)throw new Error('No project records have been uploaded yet.');
+  const local=window.ABMApp.getState();
+  const hasLocal=local.projects.some(p=>p.records.length||p.investments.length||p.usages.length||p.diary.length||Number(p.budget||0)>0);
+  if(hasLocal){
+   const ok=confirm('Firebase is empty. Upload the projects and records currently saved on this device to the cloud? This will not delete your local backup.');
+   if(!ok)throw new Error('Cloud setup paused. Your records remain on this device. Sign in again when ready to upload.');
+  }
+  const batch=db.batch();
+  local.projects.forEach(p=>batch.set(db.collection(COLLECTION).doc(p.id),{...p,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));
+  await batch.commit();
+ }else{
+  if(isAdmin){
+   const ok=confirm('Cloud records already exist. Load the cloud records into this app? Your current device records will be replaced in this browser view. Keep your JSON backup safe.');
+   if(!ok)throw new Error('Sign-in cancelled to protect your local records.');
+  }
+ }
+ stopListener();
+ unsubscribe=db.collection(COLLECTION).onSnapshot(query=>{
+  const projects=query.docs.map(d=>{const x=d.data();return {...x,id:d.id}});
+  if(projects.length){
+   const old=window.ABMApp.getState();
+   const active=projects.some(p=>p.id===old.activeId)?old.activeId:projects[0].id;
+   window.ABMApp.setCloudState({projects,activeId:active});
+  }
+ },err=>{console.error(err);if(el('message'))el('message').textContent='Cloud sync error: '+err.message;});
+ el('loginPanel').hidden=true;el('appContent').hidden=false;
+ el('signedInAs').textContent=user.email+' · '+(isAdmin?'Administrator':'Read-only viewer');
+ setReadOnly(!isAdmin);
+ ready=true;
+}
+window.ABMCloud={
+ get role(){return role},
+ async saveProject(p){
+  if(!ready||role!=='admin')return;
+  try{await db.collection(COLLECTION).doc(p.id).set({...p,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});el('message').textContent='Saved on this device and synchronised to Firebase.'}
+  catch(e){console.error(e);el('message').textContent='Saved on this device, but cloud sync failed: '+e.message;}
+ },
+ async saveAll(projects){
+  if(!ready||role!=='admin')return;
+  const batch=db.batch();projects.forEach(p=>batch.set(db.collection(COLLECTION).doc(p.id),{...p,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));await batch.commit();
+ }
+};
+try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();}catch(e){showLogin('Firebase could not start: '+e.message);return;}
+el('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();const btn=el('loginButton');btn.disabled=true;message('Signing in…');
+ try{await auth.signInWithEmailAndPassword(el('loginEmail').value.trim(),el('loginPassword').value);}
+ catch(err){console.error(err);message(err.message||'Sign-in failed. Check your email and password.');try{await auth.signOut()}catch(_){} }
+ finally{btn.disabled=false;}
+});
+el('logoutButton').addEventListener('click',async()=>{ready=false;stopListener();await auth.signOut();role=null;showLogin('You have signed out.');});
+auth.onAuthStateChanged(async user=>{
+ if(!user){ready=false;stopListener();showLogin();return;}
+ if(ready)return;
+ try{await startCloud(user)}catch(err){console.error(err);await auth.signOut();showLogin(err.message);}
+});
+})();
+</script>
+ <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), KEY='amoakoBuildingManager_multi_v2', OLD='buildingProjectManager_v1';
 const stages={Walling:['Setting out','Excavation','Foundation concrete','Foundation blockwork','Ground level filling','DPC / ground beam','Wall blockwork','Pillars / columns','Lintel / coping','Plastering','Painting / finishing','Gate installation'], 'Main Building':['Site preparation','Excavation','Foundation','Ground floor blockwork','Columns and beams','First floor slab','Upper floor blockwork','Roofing','Electrical works','Plumbing works','Plastering','Flooring and tiling','Doors and windows','Painting and finishing']};
@@ -222,7 +342,7 @@ let state=load(),division='Walling',tab='purchase';
 const project=()=>state.projects.find(p=>p.id===state.activeId)||state.projects[0], money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2}),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>{let d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 ['pDate','lDate','bDate','uDate','oDate','iDate','dDate'].forEach(id=>$(id).value=today());
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));render()}catch(e){alert('Storage is full or unavailable. Download a backup before continuing.')}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));render();if(window.ABMCloud&&window.ABMCloud.role==='admin')window.ABMCloud.saveProject(project())}catch(e){alert('Storage is full or unavailable. Download a backup before continuing.')}};
 const spent=p=>p.records.reduce((s,r)=>s+Number(r.paid||0),0), invested=p=>p.investments.reduce((s,r)=>s+Number(r.amount||0),0);
 function currentRecords(p){return p.records.filter(r=>division==='All'||r.division===division)}
 function render(){
@@ -248,7 +368,7 @@ function render(){
  let stagesFor=division==='All'?['Walling','Main Building']:[division],stageHtml='';stagesFor.forEach(div=>{stageHtml+=`<h3>${esc(div)}</h3>`+stages[div].map((s,i)=>{let val=Number(p.progress[div][s]||0);return `<div class="entry"><div class="row"><label>${esc(s)}</label><b>${val}%</b></div><input type="range" min="0" max="100" step="5" value="${val}" data-progress="${esc(div)}|${esc(s)}"></div>`}).join('')});
  $('progressList').innerHTML=stageHtml;let vals=stagesFor.flatMap(d=>stages[d].map(s=>Number(p.progress[d][s]||0)));$('progressOverall').textContent='Overall progress: '+Math.round(vals.reduce((a,b)=>a+b,0)/Math.max(vals.length,1))+'%';
 }
-function switchTab(id){tab=id;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('selected',b.dataset.tab===id));['purchase','labour','blocks','usage','other','investment','inventory','diary','records','progress'].forEach(x=>$(x).hidden=x!==id)}
+     function switchTab(id){tab=id;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('selected',b.dataset.tab===id));['purchase','labour','blocks','usage','other','investment','inventory','diary','records','progress'].forEach(x=>$(x).hidden=x!==id)}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 document.querySelectorAll('.division').forEach(b=>b.onclick=()=>{division=b.dataset.division;render()});
 $('projectSelect').onchange=()=>{state.activeId=$('projectSelect').value;save()};
@@ -278,10 +398,12 @@ document.addEventListener('click',e=>{let p=project();if(e.target.dataset.delRec
 const download=(content,name,type)=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)};
 $('backup').onclick=()=>download(JSON.stringify(state,null,2),'amoako-building-manager-full-backup.json','application/json');
 $('csv').onclick=()=>{let p=project(),rows=[['Project','Division','Date','Type','Item','Quantity','Unit','Total Cost','Amount Paid','Outstanding','Supplier / Payee','Notes'],...p.records.map(r=>[p.name,r.division,r.date,r.type,r.item,r.qty,r.unit,r.total,r.paid,r.total-r.paid,r.payee,r.notes])];download('\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),'amoako-transactions.csv','text/csv;charset=utf-8')};
-$('restore').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.projects)||!d.projects.length)throw Error('This is not a valid Amoako backup.');if(confirm('Replace all current projects and records with this backup? Download a backup first.')){state={projects:d.projects.map(normal),activeId:d.activeId||d.projects[0].id};save();$('message').textContent='Backup restored.'}}catch(err){$('message').textContent='Restore failed: '+err.message}e.target.value=''};
+$('restore').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.projects)||!d.projects.length)throw Error('This is not a valid Amoako backup.');if(confirm('Replace all current projects and records with this backup? Download a backup first.')){state={projects:d.projects.map(normal),activeId:d.activeId||d.projects[0].id};save();if(window.ABMCloud&&window.ABMCloud.role==='admin')window.ABMCloud.saveAll(state.projects).catch(err=>{$('message').textContent='Backup restored locally, but cloud update failed: '+err.message});$('message').textContent='Backup restored.'}}catch(err){$('message').textContent='Restore failed: '+err.message}e.target.value=''};
 $('pdf').onclick=()=>{let p=project(),r=p.records,tot=spent(p),iv=invested(p),lines=r.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.division)}</td><td>${esc(x.type)}</td><td>${esc(x.item)}</td><td>${x.qty||''} ${esc(x.unit||'')}</td><td>${money(x.total)}</td><td>${money(x.paid)}</td><td>${money(x.total-x.paid)}</td></tr>`).join(''),stock=[...new Set([...r.filter(x=>x.type==='Material').map(x=>x.item+'|'+x.unit),...p.usages.map(x=>x.item+'|'+x.unit)])].map(k=>{let [item,unit]=k.split('|'),b=r.filter(x=>x.type==='Material'&&x.item===item&&x.unit===unit).reduce((s,x)=>s+x.qty,0),u=p.usages.filter(x=>x.item===item&&x.unit===unit).reduce((s,x)=>s+x.qty,0);return `<tr><td>${esc(item)}</td><td>${esc(unit)}</td><td>${b}</td><td>${u}</td><td>${b-u}</td></tr>`}).join('');let w=window.open('','_blank');if(!w){alert('Allow pop-ups to create the PDF report.');return}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Amoako report</title><style>body{font:12px Arial;margin:25px;color:#222}h1{background:#174b3a;color:white;padding:18px}h2{color:#174b3a;margin-top:25px}table{width:100%;border-collapse:collapse;margin:10px 0}td,th{border:1px solid #ccc;padding:7px;text-align:left}th{background:#eaf2ed}.stats{display:flex;gap:10px}.stats div{border:1px solid #ccc;padding:10px;flex:1}@page{size:A4 landscape;margin:12mm}</style></head><body><h1>AMOAKO BUILDING MANAGER<br><small>${esc(p.name)} — Complete Construction Report</small></h1><p>Generated: ${new Date().toLocaleString('en-GH')}</p><div class="stats"><div>Budget<br><b>${money(p.budget)}</b></div><div>Investments<br><b>${money(iv)}</b></div><div>Expenditure<br><b>${money(tot)}</b></div><div>Available funds<br><b>${money(iv-tot)}</b></div></div><h2>Detailed financial records</h2><table><tr><th>Date</th><th>Division</th><th>Type</th><th>Description</th><th>Quantity</th><th>Total cost</th><th>Paid</th><th>Outstanding</th></tr>${lines||'<tr><td colspan="8">No records</td></tr>'}</table><h2>Material stock summary</h2><table><tr><th>Material</th><th>Unit</th><th>Purchased</th><th>Used</th><th>Balance</th></tr>${stock||'<tr><td colspan="5">No materials recorded</td></tr>'}</table><h2>Investments</h2><table><tr><th>Date</th><th>Source</th><th>Contributor</th><th>Purpose</th><th>Amount</th></tr>${p.investments.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.source)}</td><td>${esc(x.from)}</td><td>${esc(x.purpose)}</td><td>${money(x.amount)}</td></tr>`).join('')}</table><script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);w.document.close()};
+window.ABMApp={getState:()=>state,setCloudState:d=>{state={projects:d.projects.map(normal),activeId:d.activeId};try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}render()},getProject:()=>project()};
 render();switchTab('purchase');
 })();
 </script>
 </body>
-</html>
+</html> 
+      
