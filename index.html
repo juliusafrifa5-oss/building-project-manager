@@ -1,904 +1,286 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#174b3a">
+<meta name="description" content="Amoako Building Manager — separate walling and main-building construction accounts.">
 <title>Amoako Building Manager</title>
-
 <style>
-:root{
---green:#174b3a;
---light:#f3f7f4;
---line:#dce5df;
---text:#17231d;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--light);color:var(--text)}
-header{background:var(--green);color:white;padding:20px}
-header h1{margin:0;font-size:22px}
-header p{margin:6px 0 0;font-size:13px}
-main{max-width:950px;margin:auto;padding:12px}
-.card{background:white;border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.metric{font-size:21px;font-weight:bold;overflow-wrap:anywhere}
-.muted{color:#68766e;font-size:13px}
-button{padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:white;font-weight:bold;cursor:pointer}
-button.primary,.project-choice[aria-pressed="true"]{background:var(--green);color:white;border-color:var(--green)}
-input,select,textarea{width:100%;padding:11px;border:1px solid #cbd7d0;border-radius:8px;font-size:16px;background:white}
-label{display:block;margin:10px 0 5px;font-size:13px;color:#68766e}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0}
-.tabs button{white-space:nowrap}
-.tab[aria-selected="true"]{background:var(--green);color:white}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.entry{border-bottom:1px solid var(--line);padding:10px 0}
-.entry:last-child{border:0}
-.bar{height:9px;background:#e4ebe7;border-radius:20px;overflow:hidden;margin-top:10px}
-.bar div{height:100%;background:#24845e;width:0}
-section[hidden]{display:none}
-.full{width:100%;margin-top:12px}
-.small{font-size:12px;color:#68766e}
-.project-choice{margin:4px}
-@media(max-width:420px){
-.metric{font-size:18px}
-main{padding:9px}
-}
+:root{font-family:Arial,system-ui,sans-serif;color:#17231d;background:#f3f6f4;--g:#174b3a;--line:#d7e1db;--muted:#65736b;--light:#eaf2ed}
+*{box-sizing:border-box}body{margin:0}header{background:var(--g);color:white;padding:19px 15px}header h1{margin:0 0 5px;font-size:22px}header p{margin:0;color:#dcebe3;font-size:13px}
+main{max-width:1100px;margin:auto;padding:13px}.card{background:white;border:1px solid var(--line);border-radius:13px;padding:14px;margin:0 0 12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{font-size:21px;font-weight:750;overflow-wrap:anywhere}.muted,.small{color:var(--muted);font-size:13px}.small{font-size:11px}
+button{border:1px solid var(--line);background:white;color:#17231d;padding:10px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px}
+button.primary,.selected{background:var(--g);color:white;border-color:var(--g)}button.danger{color:#a32929;border-color:#e6caca}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd7d0;border-radius:8px;font:inherit;font-size:15px;background:white;color:#17231d}
+label{display:block;margin:9px 0 5px;color:var(--muted);font-size:12px;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.tabs{display:flex;gap:7px;overflow:auto;padding:3px 0 9px}.tabs button{white-space:nowrap}
+section[hidden]{display:none!important}.pill{display:inline-block;padding:4px 8px;background:var(--light);border-radius:20px;font-size:11px;color:var(--g);font-weight:700}
+.stat{background:#fbfdfb;border:1px solid var(--line);padding:11px;border-radius:10px}.stat .muted{margin-bottom:5px}
+.entry{padding:11px 0;border-bottom:1px solid var(--line)}.entry:last-child{border-bottom:0}
+.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:8px;border:1px solid var(--line);text-align:left;white-space:nowrap}th{background:var(--light);color:var(--g)}
+.bar{height:8px;background:#e3ebe6;border-radius:20px;overflow:hidden;margin:8px 0}.bar>div{height:100%;background:#24845e}
+.full{width:100%;margin-top:12px}.notice{background:#fff8e6;border:1px solid #f0dfad;padding:10px;border-radius:8px;font-size:12px;margin:8px 0}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}}
+@media(max-width:420px){main{padding:9px}.metric{font-size:18px}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr 1fr}}
+@media print{header,.tabs,button,form,.noprint{display:none!important}body{background:white}main{max-width:none;padding:0}.card{break-inside:avoid;border:0}}
 </style>
 </head>
-
 <body>
-<header>
-<h1>Amoako Building Manager</h1>
-<p>Construction expenses · Investments · Labourers · Materials · Site progress</p>
-</header>
-
+<header><div style="max-width:1100px;margin:auto"><h1>AMOAKO BUILDING MANAGER</h1><p>Construction accounts · Materials · Workmanship · Inventory · Cash flow · Ghana cedi (GH₵)</p></div></header>
 <main>
-
 <div class="card">
-<div class="row">
-<b>Select Building Project</b>
-<button id="addProject">＋ Add Project</button>
-</div>
-<div class="row" style="margin-top:10px">
-<select id="projectSelect" style="flex:1"></select>
-<button id="renameProject">Rename</button>
-</div>
-<div id="projectButtons" style="margin-top:10px"></div>
-<p class="small">Each project has its own separate financial records and dashboard.</p>
+ <div class="row"><b>PROJECT CONTROL</b><button id="addProject">＋ Add separate project</button></div>
+ <div class="two">
+  <div><label>Selected project</label><select id="projectSelect"></select></div>
+  <div><label>Project name</label><div class="row"><span id="projectName" class="pill">Amoako</span><button id="renameProject">Rename</button></div></div>
+ </div>
+ <div class="row" style="justify-content:flex-start;margin-top:10px" id="projectButtons"></div>
+ <div class="small">Each project has its own financial records. Walling and Main Building are also accounted for separately inside each project.</div>
 </div>
 
 <div class="card">
-<div class="row">
-<b>Project Budget</b>
-<button id="setbudget">Set / Edit Budget</button>
-</div>
-<div class="metric" id="budgetDisplay">GH₵0.00</div>
-<p class="muted">Total expenditure: <b id="spent">GH₵0.00</b></p>
-<p class="muted">Total money invested: <b id="invested">GH₵0.00</b></p>
-<p class="muted">Available funds now: <b id="available">GH₵0.00</b></p>
-<div class="bar"><div id="bar"></div></div>
-<p class="muted" id="budgetNote"></p>
+ <div class="row"><b>PROJECT SUMMARY</b><button id="setBudget">Set / edit budget</button></div>
+ <div class="metric" id="budgetDisplay">GH₵0.00</div>
+ <div class="grid" style="margin-top:10px">
+  <div class="stat"><div class="muted">Total invested</div><b id="invested">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Total expenditure</div><b id="spent">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Available cash</div><b id="available">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Budget remaining</div><b id="balance">GH₵0.00</b></div>
+ </div><div class="bar"><div id="budgetBar"></div></div><div class="small" id="budgetNote">No fixed budget set. Record investments and expenses as they occur.</div>
 </div>
 
-<div class="grid">
-<div class="card"><div class="muted">Materials</div><div class="metric" id="materials">GH₵0.00</div></div>
-<div class="card"><div class="muted">Labour</div><div class="metric" id="labour">GH₵0.00</div></div>
-<div class="card"><div class="muted">Other Expenses</div><div class="metric" id="other">GH₵0.00</div></div>
-<div class="card"><div class="muted">Budget Balance</div><div class="metric" id="balance">GH₵0.00</div></div>
+<div class="card">
+ <div class="row"><b>CONSTRUCTION DIVISION</b><span class="pill" id="divisionLabel">Walling</span></div>
+ <div class="row" style="justify-content:flex-start">
+  <button class="division selected" data-division="Walling">WALLING</button>
+  <button class="division" data-division="Main Building">MAIN BUILDING</button>
+  <button class="division" data-division="All">COMBINED VIEW</button>
+ </div>
+ <div class="grid" style="margin-top:10px">
+  <div class="stat"><div class="muted">Materials purchased</div><b id="matTotal">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Workmanship paid/recorded</div><b id="labTotal">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Other expenses</div><b id="otherTotal">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Division expenditure</div><b id="divisionTotal">GH₵0.00</b></div>
+ </div>
 </div>
 
 <nav class="tabs">
-<button class="tab" data-tab="expense" aria-selected="true">Record Expense</button>
-<button class="tab" data-tab="investment" aria-selected="false">Add Investment</button>
-<button class="tab" data-tab="workers" aria-selected="false">Labourers</button>
-<button class="tab" data-tab="progress" aria-selected="false">Site Progress</button>
-<button class="tab" data-tab="records" aria-selected="false">Records</button>
+ <button class="tab selected" data-tab="purchase">Record material</button>
+ <button class="tab" data-tab="labour">Workmanship</button>
+ <button class="tab" data-tab="blocks">Blocks moulding</button>
+ <button class="tab" data-tab="usage">Material usage</button>
+ <button class="tab" data-tab="other">Other expense</button>
+ <button class="tab" data-tab="investment">Investments</button>
+ <button class="tab" data-tab="inventory">Inventory</button>
+ <button class="tab" data-tab="diary">Site diary</button>
+ <button class="tab" data-tab="records">Records</button>
+ <button class="tab" data-tab="progress">Progress</button>
 </nav>
 
-<section id="expense" class="card">
-<h2>Record Expense</h2>
-<form id="expenseForm">
-<label>Category</label>
-<select id="kind">
-<option>Materials</option>
-<option>Labour</option>
-<option>Other</option>
-</select>
+<section id="purchase" class="card">
+ <h2>Material purchase record</h2><p class="muted">Every material is recorded separately under the selected division.</p>
+ <form id="purchaseForm">
+  <div class="formgrid">
+   <div><label>Date purchased</label><input id="pDate" type="date" required></div>
+   <div><label>Material item</label><select id="pItem"><option>Cement</option><option>Sand</option><option>Iron rods</option><option>Wood</option><option>Blocks</option><option>Stones</option><option>Chippings</option><option>Water</option><option>Nails</option><option>Binding wire</option><option>Roofing materials</option><option>Electrical materials</option><option>Plumbing materials</option><option>Paint</option><option>Tiles</option><option>Doors and windows</option><option>Other material</option></select></div>
+   <div><label>Specify item / description</label><input id="pDesc" placeholder="e.g. 16mm rods, 6-inch blocks"></div>
+   <div class="two"><div><label>Quantity purchased</label><input id="pQty" type="number" min="0.001" step="any" required></div><div><label>Unit</label><select id="pUnit"><option>bags</option><option>trips</option><option>pieces</option><option>tonnes</option><option>lengths</option><option>blocks</option><option>loads</option><option> rolls</option><option>litres</option><option>cartons</option><option>other</option></select></div></div>
+   <div><label>Unit price (GH₵)</label><input id="pRate" type="number" min="0" step="0.01" required></div>
+   <div><label>Total purchase cost (GH₵)</label><input id="pTotal" readonly placeholder="Calculated automatically"></div>
+   <div><label>Amount paid (GH₵)</label><input id="pPaid" type="number" min="0" step="0.01" required></div>
+   <div><label>Supplier / seller</label><input id="pSupplier" placeholder="Supplier's name"></div>
+   <div><label>Receipt / invoice reference</label><input id="pReceipt" placeholder="Optional reference"></div>
+   <div><label>Payment method</label><select id="pMethod"><option>Cash</option><option>Mobile Money</option><option>Bank transfer</option><option>Credit</option><option>Other</option></select></div>
+  </div>
+  <label>Notes</label><textarea id="pNotes" rows="2"></textarea>
+  <button class="primary full">Save material purchase</button>
+ </form>
+</section>
 
-<div class="two">
-<div><label>Date</label><input id="date" type="date" required></div>
-<div><label>Amount (GH₵)</label><input id="amount" type="number" min="0.01" step="0.01" required></div>
-</div>
+<section id="labour" class="card" hidden>
+ <h2>Workmanship / labour payment</h2><p class="muted">Wall workmanship and main-building workmanship remain separate.</p>
+ <form id="labourForm">
+  <div class="formgrid">
+   <div><label>Date</label><input id="lDate" type="date" required></div>
+   <div><label>Work / trade</label><select id="lTrade"><option>Mason</option><option>Carpenter</option><option>Labourers</option><option>Steel bender</option><option>Welder</option><option>Roofer</option><option>Electrician</option><option>Plumber</option><option>Tiler</option><option>Painter</option><option>Other workmanship</option></select></div>
+   <div><label>Worker / contractor</label><input id="lWorker" required></div>
+   <div><label>Work description / stage</label><input id="lWork" placeholder="e.g. Foundation block laying"></div>
+   <div><label>Agreed / total labour cost (GH₵)</label><input id="lTotal" type="number" min="0.01" step="0.01" required></div>
+   <div><label>Amount paid now (GH₵)</label><input id="lPaid" type="number" min="0" step="0.01" required></div>
+   <div><label>Payment basis</label><select id="lBasis"><option>Daily</option><option>Weekly</option><option>By task</option><option>Contract</option><option>Other</option></select></div>
+   <div><label>Payment reference / notes</label><input id="lRef"></div>
+  </div><button class="primary full">Save workmanship record</button>
+ </form>
+</section>
 
-<label>Item / Description</label>
-<input id="item" required placeholder="e.g. Cement, blocks, sand">
+<section id="blocks" class="card" hidden>
+ <h2>Blocks moulding record</h2>
+ <p class="muted">Record blocks moulded, the workmanship cost per block, total workmanship cost and water purchased. These costs are included in the selected division's financial records.</p>
+ <form id="blocksForm">
+  <div class="formgrid">
+   <div><label>Date</label><input id="bDate" type="date" required></div>
+   <div><label>Number of blocks moulded</label><input id="bQty" type="number" min="1" step="1" required></div>
+   <div><label>Workmanship cost per block (GH₵)</label><input id="bRate" type="number" min="0" step="0.01" required></div>
+   <div><label>Total workmanship cost (GH₵)</label><input id="bTotal" type="number" readonly></div>
+   <div><label>Water purchased — quantity (optional)</label><input id="bWaterQty" type="number" min="0" step="any" placeholder="e.g. 1"></div>
+   <div><label>Water unit</label><select id="bWaterUnit"><option>tanker</option><option>trip</option><option>barrels</option><option>drums</option><option>litres</option><option>other</option></select></div>
+   <div><label>Amount paid for water (GH₵)</label><input id="bWaterCost" type="number" min="0" step="0.01" value="0"></div>
+   <div><label>Water supplier / recipient</label><input id="bWaterSupplier" placeholder="Optional"></div>
+  </div>
+  <label>Notes</label><textarea id="bNotes" rows="2" placeholder="Block size, mix details, site location, etc."></textarea>
+  <button class="primary full">Save blocks moulding record</button>
+ </form>
+ <div class="grid" style="margin-top:12px">
+  <div class="stat"><div class="muted">Blocks moulded</div><b id="blocksCount">0</b></div>
+  <div class="stat"><div class="muted">Workmanship cost</div><b id="blocksWorkCost">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Water purchased</div><b id="blocksWaterCost">GH₵0.00</b></div>
+  <div class="stat"><div class="muted">Total block moulding cost</div><b id="blocksGrandCost">GH₵0.00</b></div>
+ </div>
+ <h3>Blocks moulding history</h3><div id="blocksHistory"></div>
+</section>
 
-<div class="two">
-<div><label>Quantity</label><input id="qty" type="number" min="0" step="any"></div>
-<div><label>Unit</label><input id="unit" placeholder="bags, trips, days"></div>
-</div>
+<section id="usage" class="card" hidden>
+ <h2>Record material used</h2><p class="muted">Usage reduces the available stock quantity. Select the same material name and unit used when purchasing.</p>
+ <form id="usageForm">
+  <div class="two"><div><label>Date used</label><input id="uDate" type="date" required></div><div><label>Material</label><select id="uItem"><option>Cement</option><option>Sand</option><option>Iron rods</option><option>Wood</option><option>Blocks</option><option>Stones</option><option>Chippings</option><option>Water</option><option>Nails</option><option>Binding wire</option><option>Other material</option></select></div></div>
+  <div class="two"><div><label>Quantity used</label><input id="uQty" type="number" min="0.001" step="any" required></div><div><label>Unit</label><input id="uUnit" placeholder="bags, trips, pieces..." required></div></div>
+  <label>Where / purpose used</label><input id="uPurpose" placeholder="e.g. front wall foundation">
+  <button class="primary full">Save material usage</button>
+ </form>
+</section>
 
-<label>Supplier / Recipient</label>
-<input id="payee">
-
-<label>Notes</label>
-<textarea id="notes" rows="2"></textarea>
-
-<button class="primary full">Save Expense</button>
-</form>
+<section id="other" class="card" hidden>
+ <h2>Other construction expenses</h2>
+ <form id="otherForm">
+  <div class="two"><div><label>Date</label><input id="oDate" type="date" required></div><div><label>Expense category</label><select id="oCategory"><option>Transportation</option><option>Equipment hire</option><option>Site security</option><option>Permits / documentation</option><option>Water / electricity</option><option>Food / welfare</option><option>Repairs</option><option>Professional fees</option><option>Miscellaneous</option></select></div></div>
+  <label>Description</label><input id="oDesc" required>
+  <div class="two"><div><label>Amount (GH₵)</label><input id="oAmount" type="number" min="0.01" step="0.01" required></div><div><label>Paid to</label><input id="oPayee"></div></div>
+  <label>Notes / receipt</label><textarea id="oNotes" rows="2"></textarea><button class="primary full">Save other expense</button>
+ </form>
 </section>
 
 <section id="investment" class="card" hidden>
-<h2>Record Investment</h2>
-<p class="muted">Record money received for the selected building project.</p>
-
-<form id="investmentForm">
-<div class="two">
-<div><label>Date Received</label><input id="invDate" type="date" required></div>
-<div><label>Amount Received (GH₵)</label><input id="invAmount" type="number" min="0.01" step="0.01" required></div>
-</div>
-
-<label>Investment Source</label>
-<select id="invSource"></select>
-
-<label>Contributor / Source Name</label>
-<input id="invName" placeholder="Optional">
-
-<label>Purpose / Description</label>
-<input id="invPurpose" placeholder="e.g. Foundation work">
-
-<label>Notes</label>
-<textarea id="invNotes" rows="2"></textarea>
-
-<button class="primary full">Save Investment</button>
-</form>
-
-<hr>
-<h3>Investment Summary</h3>
-<div class="metric" id="investmentTotal">GH₵0.00</div>
-<div id="sourceSummary"></div>
-
-<h3>Available Funds</h3>
-<div class="metric" id="availableNow">GH₵0.00</div>
-
-<h3>Investment History</h3>
-<div id="investmentList"></div>
+ <h2>Project investments / funds received</h2><p class="muted">Investment sources for Amoako Project 1: SUSU, MOTOR SALES, LOAN and MONEY SENT.</p>
+ <form id="investmentForm">
+  <div class="two"><div><label>Date received</label><input id="iDate" type="date" required></div><div><label>Amount received (GH₵)</label><input id="iAmount" type="number" min="0.01" step="0.01" required></div></div>
+  <label>Source</label><select id="iSource"><option>SUSU</option><option>MOTOR SALES</option><option>LOAN</option><option>MONEY SENT</option><option>Other approved source</option></select>
+  <div class="two"><div><label>From / contributor</label><input id="iFrom"></div><div><label>Purpose</label><input id="iPurpose"></div></div>
+  <label>Notes</label><textarea id="iNotes" rows="2"></textarea><button class="primary full">Save investment</button>
+ </form><div id="investmentHistory"></div>
 </section>
 
-<section id="workers" class="card" hidden>
-<h2>Labourers Register</h2>
-
-<form id="workerForm">
-<label>Worker / Contractor Name</label>
-<input id="workerName" required>
-
-<label>Trade / Role</label>
-<input id="trade" required placeholder="Mason, carpenter, labourer">
-
-<div class="two">
-<div><label>Agreed Rate (GH₵)</label><input id="rate" type="number" min="0" step="0.01"></div>
-<div>
-<label>Payment Basis</label>
-<select id="basis">
-<option>Per day</option>
-<option>Per week</option>
-<option>Per contract</option>
-<option>Other</option>
-</select>
-</div>
-</div>
-
-<button class="primary full">Add Labourer</button>
-</form>
-
-<h3>Registered Workers</h3>
-<div id="workerList"></div>
-<p class="small">Record actual labour payments under Record Expense → Labour.</p>
+<section id="inventory" class="card" hidden>
+ <h2>Material inventory</h2><p class="muted">Stock is calculated from purchase quantities less recorded usage. Figures are separated by project and division.</p>
+ <div class="tablewrap"><table><thead><tr><th>Material</th><th>Unit</th><th>Purchased</th><th>Used</th><th>Balance</th><th>Purchase value</th></tr></thead><tbody id="stockRows"></tbody></table></div>
+ <h3>Material purchase history</h3><div id="purchaseHistory"></div>
 </section>
 
-<section id="progress" class="card" hidden>
-<h2>Construction Progress</h2>
-<div id="stageList"></div>
-<b id="overall">Overall Progress: 0%</b>
+<section id="diary" class="card" hidden>
+ <h2>Daily site diary</h2>
+ <form id="diaryForm"><div class="two"><div><label>Date</label><input id="dDate" type="date" required></div><div><label>Workers on site</label><input id="dWorkers" type="number" min="0" step="1"></div></div>
+ <label>Work completed today</label><textarea id="dWork" rows="3" required></textarea><label>Materials delivered / used</label><textarea id="dMaterials" rows="2"></textarea><label>Issues / delays / instructions</label><textarea id="dIssues" rows="2"></textarea><button class="primary full">Save site diary</button></form>
+ <div id="diaryHistory"></div>
 </section>
 
 <section id="records" class="card" hidden>
-<div class="row">
-<h2>Transaction History</h2>
-<select id="filter" style="width:auto">
-<option>All</option>
-<option>Materials</option>
-<option>Labour</option>
-<option>Other</option>
-</select>
-</div>
-<div id="historyList"></div>
+ <h2>Financial transaction records</h2>
+ <div class="two"><div><label>Filter by record type</label><select id="recordFilter"><option>All</option><option>Material</option><option>Workmanship</option><option>Other</option></select></div><div><label>Filter by division</label><select id="divisionFilter"><option>Current division</option><option>Walling</option><option>Main Building</option><option>All</option></select></div></div>
+ <div id="recordList"></div>
 </section>
 
-<div class="card">
-<h3>Backup and Reports</h3>
-<p class="muted">Backup includes all projects. CSV and PDF reports cover the currently selected project.</p>
+<section id="progress" class="card" hidden>
+ <h2>Construction progress tracker</h2><p class="muted">Progress is recorded separately for Walling and Main Building.</p>
+ <div id="progressList"></div><b id="progressOverall">Overall progress: 0%</b>
+</section>
 
-<div class="row">
-<button id="backup">Download All-Project Backup</button>
-<button id="csv">Export Project CSV</button>
-<button id="print" class="primary">Print / Save PDF Report</button>
+<div class="card noprint">
+ <h3>Reports, backup and data protection</h3>
+ <div class="row">
+  <button id="pdf" class="primary">Print / Save PDF report</button><button id="csv">Export CSV</button><button id="backup">Download full backup</button>
+ </div>
+ <label>Restore from backup (replaces current records)</label><input id="restore" type="file" accept="application/json">
+ <p class="small" id="message" aria-live="polite">Records are saved on this device. Download backups regularly and before changing phones or clearing browser data.</p>
 </div>
-
-<label>Restore Backup</label>
-<input id="restore" type="file" accept="application/json">
-<p id="message" class="muted"></p>
-</div>
-
 </main>
-
 <script>
 (()=>{'use strict';
-
-const $=id=>document.getElementById(id);
-const KEY='amoakoBuildingManager_multi_v2';
-const LEGACY='buildingProjectManager_v1';
-
-const PROJECT1_SOURCES=[
-'SUSU',
-'MOTOR SALES',
-'LOAN',
-'MONEY SENT'
-];
-
-const PROJECT2_SOURCES=[
-'Wife',
-'Loan',
-'Yearly Susu',
-'Personal savings',
-'Gift'
-];
-
-const defaultStages=[
-['Land preparation',0],
-['Foundation',0],
-['Ground floor blockwork',0],
-['Lintel and roofing',0],
-['Upper floor / structural work',0],
-['Plastering',0],
-['Electrical and plumbing',0],
-['Flooring and tiling',0],
-['Painting and finishing',0],
-['Doors, windows and fittings',0]
-];
-
-function blankProject(name,id){
-return {
-id:id||'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
-name:name,
-budget:0,
-entries:[],
-investments:[],
-workers:[],
-stages:defaultStages.map(x=>[...x])
-};
+const $=id=>document.getElementById(id), KEY='amoakoBuildingManager_multi_v2', OLD='buildingProjectManager_v1';
+const stages={Walling:['Setting out','Excavation','Foundation concrete','Foundation blockwork','Ground level filling','DPC / ground beam','Wall blockwork','Pillars / columns','Lintel / coping','Plastering','Painting / finishing','Gate installation'], 'Main Building':['Site preparation','Excavation','Foundation','Ground floor blockwork','Columns and beams','First floor slab','Upper floor blockwork','Roofing','Electrical works','Plumbing works','Plastering','Flooring and tiling','Doors and windows','Painting and finishing']};
+const blank=(name,id)=>({id:id||'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),name,budget:0,investments:[],records:[],usages:[],diary:[],progress:{Walling:{},'Main Building':{}}});
+function normal(p){let x=blank(p.name||'Building Project',p.id);Object.assign(x,p);x.records=Array.isArray(p.records)?p.records:[];x.investments=Array.isArray(p.investments)?p.investments:[];x.usages=Array.isArray(p.usages)?p.usages:[];x.diary=Array.isArray(p.diary)?p.diary:[];x.progress=p.progress||{Walling:{},'Main Building':{}};x.progress.Walling=x.progress.Walling||{};x.progress['Main Building']=x.progress['Main Building']||{};x.records=x.records.map(r=>({...r,division:r.division||'Main Building',type:r.type||({Materials:'Material',Labour:'Workmanship',Other:'Other'}[r.kind]||'Other'),total:Number(r.total??r.amount??0),paid:Number(r.paid??r.amount??0),qty:Number(r.qty)||0,unit:r.unit||''}));return x}
+function load(){
+ let d;try{d=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+ if(d&&Array.isArray(d.projects)){let ps=d.projects.map(normal);if(!ps.some(p=>p.id==='amoako_project_1'))ps[0].id='amoako_project_1';if(!ps.some(p=>p.id==='amoako_project_2'))ps.push(blank('Project 2','amoako_project_2'));return {projects:ps,activeId:ps.some(p=>p.id===d.activeId)?d.activeId:ps[0].id}}
+ let old={};try{old=JSON.parse(localStorage.getItem(OLD)||'{}')}catch(e){}
+ let first=blank('Amoako Building Project','amoako_project_1');first.budget=Number(old.budget)||0;first.investments=old.investments||[];first.records=(old.entries||[]).map(e=>({type:e.kind==='Materials'?'Material':e.kind==='Labour'?'Workmanship':'Other',division:'Main Building',date:e.date,item:e.item,qty:Number(e.qty)||0,unit:e.unit||'',total:Number(e.amount)||0,paid:Number(e.amount)||0,payee:e.payee||'',notes:e.notes||'',legacy:true}));first.workers=old.workers||[];
+ return {projects:[first,blank('Project 2','amoako_project_2')],activeId:first.id}
 }
-
-function normalizeProject(p){
-const base=blankProject(p.name||'Building Project',p.id);
-return {
-...base,
-...p,
-id:p.id||base.id,
-name:p.name||base.name,
-budget:Number(p.budget)||0,
-entries:Array.isArray(p.entries)?p.entries:[],
-investments:Array.isArray(p.investments)?p.investments:[],
-workers:Array.isArray(p.workers)?p.workers:[],
-stages:Array.isArray(p.stages)?p.stages:defaultStages.map(x=>[...x])
-};
-}
-
-function loadState(){
-let current=null;
-
-try{
-current=JSON.parse(localStorage.getItem(KEY)||'null');
-}catch(e){}
-
-if(current&&Array.isArray(current.projects)&&current.projects.length){
-
-let projects=current.projects.map(normalizeProject);
-
-if(!projects.some(p=>p.id==='amoako_project_1')){
-projects[0].id='amoako_project_1';
-}
-
-const amoako=projects.find(p=>p.id==='amoako_project_1');
-
-if(amoako&&!amoako.name){
-amoako.name='Amoako Building Project';
-}
-
-if(!projects.some(p=>p.id==='amoako_project_2')){
-projects.push(blankProject('Project 2','amoako_project_2'));
-}
-
-return {
-projects,
-activeId:projects.some(p=>p.id===current.activeId)?current.activeId:projects[0].id
-};
-
-}
-
-let old={};
-
-try{
-old=JSON.parse(localStorage.getItem(LEGACY)||'{}');
-}catch(e){}
-
-const first=normalizeProject({
-id:'amoako_project_1',
-name:'Amoako Building Project',
-budget:old.budget||0,
-entries:old.entries||[],
-investments:old.investments||[],
-workers:old.workers||[],
-stages:old.stages||defaultStages.map(x=>[...x])
-});
-
-const second=blankProject('Project 2','amoako_project_2');
-
-return {
-projects:[first,second],
-activeId:first.id
-};
-}
-
-let state=loadState();
-
-const active=()=>state.projects.find(p=>p.id===state.activeId)||state.projects[0];
-
-const money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-});
-
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-}[c]));
-
-const today=()=>{
-const d=new Date();
-return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-};
-
-$('date').value=today();
-$('invDate').value=today();
-
-function sourcesFor(p){
-return p.id==='amoako_project_1'?PROJECT1_SOURCES:PROJECT2_SOURCES;
-}
-
-function totals(p){
-const spent=p.entries.reduce((s,e)=>s+Number(e.amount||0),0);
-const invested=p.investments.reduce((s,e)=>s+Number(e.amount||0),0);
-return {spent,invested,available:invested-spent};
-}
-
-function persist(){
-try{
-localStorage.setItem(KEY,JSON.stringify(state));
-render();
-}catch(e){
-alert('Unable to save. Please download a backup and check device storage.');
-}
-}
-
+let state=load(),division='Walling',tab='purchase';
+const project=()=>state.projects.find(p=>p.id===state.activeId)||state.projects[0], money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2}),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{let d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+['pDate','lDate','bDate','uDate','oDate','iDate','dDate'].forEach(id=>$(id).value=today());
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));render()}catch(e){alert('Storage is full or unavailable. Download a backup before continuing.')}};
+const spent=p=>p.records.reduce((s,r)=>s+Number(r.paid||0),0), invested=p=>p.investments.reduce((s,r)=>s+Number(r.amount||0),0);
+function currentRecords(p){return p.records.filter(r=>division==='All'||r.division===division)}
 function render(){
-
-const p=active();
-const t=totals(p);
-
-$('projectSelect').innerHTML=state.projects.map(x=>
-`<option value="${esc(x.id)}">${esc(x.name)}</option>`
-).join('');
-
-$('projectSelect').value=p.id;
-
-$('projectButtons').innerHTML=state.projects.map(x=>
-`<button class="project-choice" data-project="${esc(x.id)}" aria-pressed="${x.id===p.id?'true':'false'}">${esc(x.name)}</button>`
-).join('');
-
-const sources=sourcesFor(p);
-const oldSource=$('invSource').value;
-
-$('invSource').innerHTML=sources.map(s=>
-`<option>${esc(s)}</option>`
-).join('');
-
-if(sources.includes(oldSource)){
-$('invSource').value=oldSource;
+ let p=project();$('projectSelect').innerHTML=state.projects.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');$('projectSelect').value=p.id;$('projectName').textContent=p.name;
+ $('projectButtons').innerHTML=state.projects.map(x=>`<button data-project="${esc(x.id)}" class="${x.id===p.id?'selected':''}">${esc(x.name)}</button>`).join('');
+ let total=spent(p),inv=invested(p),cash=inv-total;$('budgetDisplay').textContent=money(p.budget);$('invested').textContent=money(inv);$('spent').textContent=money(total);$('available').textContent=money(cash);$('balance').textContent=money(p.budget-total);$('budgetBar').style.width=(p.budget?Math.min(100,total/p.budget*100):0)+'%';$('budgetNote').textContent=p.budget?`${(total/p.budget*100).toFixed(1)}% of budget used${total>p.budget?' — OVER BUDGET':''}`:'No fixed budget set. Record investments and expenses as they occur.';
+ $('divisionLabel').textContent=division==='All'?'Combined':division;document.querySelectorAll('.division').forEach(b=>b.classList.toggle('selected',b.dataset.division===division));
+ let rs=currentRecords(p),m=rs.filter(r=>r.type==='Material').reduce((s,r)=>s+r.paid,0),l=rs.filter(r=>r.type==='Workmanship').reduce((s,r)=>s+r.paid,0),o=rs.filter(r=>r.type==='Other').reduce((s,r)=>s+r.paid,0);
+ $('matTotal').textContent=money(m);$('labTotal').textContent=money(l);$('otherTotal').textContent=money(o);$('divisionTotal').textContent=money(m+l+o);
+ let blockRows=rs.filter(r=>r.item==='Blocks moulding workmanship'),waterRows=rs.filter(r=>r.item==='Water purchased for block moulding');
+ $('blocksCount').textContent=blockRows.reduce((s,r)=>s+Number(r.qty||0),0).toLocaleString('en-GH');
+ $('blocksWorkCost').textContent=money(blockRows.reduce((s,r)=>s+Number(r.total||0),0));
+ $('blocksWaterCost').textContent=money(waterRows.reduce((s,r)=>s+Number(r.total||0),0));
+ $('blocksGrandCost').textContent=money(blockRows.reduce((s,r)=>s+Number(r.total||0),0)+waterRows.reduce((s,r)=>s+Number(r.total||0),0));
+ $('blocksHistory').innerHTML=[...blockRows,...waterRows].sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(r=>`<div class="entry"><b>${esc(r.item)}</b><div class="muted">${esc(r.date)} · ${esc(r.division)} · ${r.qty||0} ${esc(r.unit||'')} · ${money(r.total)}</div></div>`).join('')||'<p class="muted">No blocks moulding records yet.</p>';
+ let invRows=p.investments.map((v,i)=>`<div class="entry"><div class="row"><b>${money(v.amount)} · ${esc(v.source)}</b><span>${esc(v.date)}</span></div><div class="muted">${esc(v.from||'')} ${v.purpose?'· '+esc(v.purpose):''}</div><button class="danger" data-del-invest="${i}">Delete</button></div>`).join('');$('investmentHistory').innerHTML='<h3>Investment history</h3>'+(invRows||'<p class="muted">No investments recorded.</p>');
+ let names=new Set([...p.records.filter(r=>r.type==='Material').map(r=>r.item+'|'+r.unit),...p.usages.map(u=>u.item+'|'+u.unit)]);
+ $('stockRows').innerHTML=[...names].map(key=>{let [item,unit]=key.split('|'),buys=p.records.filter(r=>r.type==='Material'&&r.item===item&&r.unit===unit&&(division==='All'||r.division===division)),uses=p.usages.filter(u=>u.item===item&&u.unit===unit&&(division==='All'||u.division===division)),q=buys.reduce((s,r)=>s+r.qty,0),used=uses.reduce((s,u)=>s+u.qty,0),val=buys.reduce((s,r)=>s+r.total,0);return `<tr><td>${esc(item)}</td><td>${esc(unit)}</td><td>${q}</td><td>${used}</td><td><b>${q-used}</b></td><td>${money(val)}</td></tr>`}).join('')||'<tr><td colspan="6">No stock records yet.</td></tr>';
+ $('purchaseHistory').innerHTML=p.records.filter(r=>r.type==='Material'&&(division==='All'||r.division===division)).slice().reverse().slice(0,30).map(r=>`<div class="entry"><b>${esc(r.item)} — ${r.qty} ${esc(r.unit)}</b><div class="muted">${esc(r.date)} · ${esc(r.division)} · Total ${money(r.total)} · Paid ${money(r.paid)} · Balance ${money(r.total-r.paid)}</div></div>`).join('')||'<p class="muted">No purchases recorded.</p>';
+ $('diaryHistory').innerHTML=p.diary.filter(x=>division==='All'||x.division===division).slice().reverse().map(x=>`<div class="entry"><b>${esc(x.date)} · ${esc(x.division)}</b><p>${esc(x.work)}</p><div class="muted">Workers: ${esc(x.workers||0)} · Materials: ${esc(x.materials||'')}</div>${x.issues?`<div class="small">Issues: ${esc(x.issues)}</div>`:''}</div>`).join('')||'<p class="muted">No site diary entries yet.</p>';
+ let filter=$('recordFilter').value,df=$('divisionFilter').value,shown=p.records.map((r,i)=>({...r,i})).filter(r=>(filter==='All'||r.type===filter)&&(df==='All'||(df==='Current division'?division==='All'||r.division===division:r.division===df))).reverse();
+ $('recordList').innerHTML=shown.map(r=>`<div class="entry"><div class="row"><b>${esc(r.item||r.description||r.type)}</b><b>${money(r.total)}</b></div><div class="muted">${esc(r.date)} · ${esc(r.division)} · ${esc(r.type)} · Paid ${money(r.paid)} · Outstanding ${money(r.total-r.paid)}</div>${r.qty?`<div class="small">Quantity: ${r.qty} ${esc(r.unit)} · Unit price: ${money(r.rate||0)}</div>`:''}${r.payee?`<div class="small">Supplier / recipient: ${esc(r.payee)}</div>`:''}${r.notes?`<div class="small">${esc(r.notes)}</div>`:''}<button class="danger" data-del-record="${r.i}">Delete record</button></div>`).join('')||'<p class="muted">No records match this filter.</p>';
+ let stagesFor=division==='All'?['Walling','Main Building']:[division],stageHtml='';stagesFor.forEach(div=>{stageHtml+=`<h3>${esc(div)}</h3>`+stages[div].map((s,i)=>{let val=Number(p.progress[div][s]||0);return `<div class="entry"><div class="row"><label>${esc(s)}</label><b>${val}%</b></div><input type="range" min="0" max="100" step="5" value="${val}" data-progress="${esc(div)}|${esc(s)}"></div>`}).join('')});
+ $('progressList').innerHTML=stageHtml;let vals=stagesFor.flatMap(d=>stages[d].map(s=>Number(p.progress[d][s]||0)));$('progressOverall').textContent='Overall progress: '+Math.round(vals.reduce((a,b)=>a+b,0)/Math.max(vals.length,1))+'%';
 }
-
-const categories={
-Materials:0,
-Labour:0,
-Other:0
+function switchTab(id){tab=id;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('selected',b.dataset.tab===id));['purchase','labour','blocks','usage','other','investment','inventory','diary','records','progress'].forEach(x=>$(x).hidden=x!==id)}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+document.querySelectorAll('.division').forEach(b=>b.onclick=()=>{division=b.dataset.division;render()});
+$('projectSelect').onchange=()=>{state.activeId=$('projectSelect').value;save()};
+$('projectButtons').onclick=e=>{let b=e.target.closest('[data-project]');if(b){state.activeId=b.dataset.project;save()}};
+$('addProject').onclick=()=>{let n=prompt('Name the separate project:');if(n&&n.trim()){let p=blank(n.trim());state.projects.push(p);state.activeId=p.id;save()}};
+$('renameProject').onclick=()=>{let n=prompt('Enter project name:',project().name);if(n&&n.trim()){project().name=n.trim();save()}};
+$('setBudget').onclick=()=>{let n=prompt('Enter project budget in GH₵. Leave 0 if there is no fixed budget:',project().budget||0);if(n!==null&&Number.isFinite(Number(n))&&Number(n)>=0){project().budget=Number(n);save()}};
+$('pQty').oninput=$('pRate').oninput=()=>{$('pTotal').value=(Number($('pQty').value||0)*Number($('pRate').value||0)).toFixed(2)};
+$('purchaseForm').onsubmit=e=>{e.preventDefault();let q=Number($('pQty').value),rate=Number($('pRate').value),total=q*rate,paid=Number($('pPaid').value);if(paid>total){alert('Amount paid cannot exceed total purchase cost.');return}project().records.push({type:'Material',division:division==='All'?'Main Building':division,date:$('pDate').value,item:$('pItem').value+( $('pDesc').value?' — '+$('pDesc').value.trim():''),qty:q,unit:$('pUnit').value,rate,total,paid,payee:$('pSupplier').value,receipt:$('pReceipt').value,method:$('pMethod').value,notes:$('pNotes').value});e.target.reset();$('pDate').value=today();$('pTotal').value='';save();$('message').textContent='Material purchase saved.'};
+$('labourForm').onsubmit=e=>{e.preventDefault();let total=Number($('lTotal').value),paid=Number($('lPaid').value);if(paid>total){alert('Amount paid cannot exceed agreed labour cost.');return}project().records.push({type:'Workmanship',division:division==='All'?'Main Building':division,date:$('lDate').value,item:$('lTrade').value+' — '+$('lWorker').value,description:$('lWork').value,qty:1,unit:$('lBasis').value,total,paid,payee:$('lWorker').value,notes:$('lRef').value});e.target.reset();$('lDate').value=today();save();$('message').textContent='Workmanship saved.'};
+$('bQty').oninput=$('bRate').oninput=()=>{$('bTotal').value=(Number($('bQty').value||0)*Number($('bRate').value||0)).toFixed(2)};
+$('blocksForm').onsubmit=e=>{
+ e.preventDefault();
+ let p=project(),qty=Number($('bQty').value),rate=Number($('bRate').value),workCost=qty*rate,waterCost=Number($('bWaterCost').value||0),date=$('bDate').value,div=division==='All'?'Main Building':division;
+ if(qty<=0||rate<0||waterCost<0){alert('Check the blocks quantity and costs.');return}
+ p.records.push({type:'Workmanship',division:div,date,item:'Blocks moulding workmanship',description:'Blocks moulded: '+qty,qty,unit:'blocks',rate,total:workCost,paid:workCost,payee:'Block moulding workers',notes:$('bNotes').value});
+ if(waterCost>0)p.records.push({type:'Other',division:div,date,item:'Water purchased for block moulding',qty:Number($('bWaterQty').value||0),unit:$('bWaterUnit').value,total:waterCost,paid:waterCost,payee:$('bWaterSupplier').value,notes:$('bNotes').value});
+ e.target.reset();$('bDate').value=today();$('bTotal').value='';$('bWaterCost').value='0';save();$('message').textContent='Blocks moulding and water purchase saved.';
 };
-
-p.entries.forEach(e=>{
-const k=categories[e.kind]===undefined?'Other':e.kind;
-categories[k]+=Number(e.amount||0);
-});
-
-$('budgetDisplay').textContent=money(p.budget);
-$('spent').textContent=money(t.spent);
-$('invested').textContent=money(t.invested);
-$('available').textContent=money(t.available);
-
-$('materials').textContent=money(categories.Materials);
-$('labour').textContent=money(categories.Labour);
-$('other').textContent=money(categories.Other);
-$('balance').textContent=money(p.budget-t.spent);
-
-const percentage=p.budget?t.spent/p.budget*100:0;
-$('bar').style.width=Math.min(100,Math.max(0,percentage))+'%';
-
-$('budgetNote').textContent=p.budget?
-percentage.toFixed(1)+'% of budget spent'+(t.spent>p.budget?' — OVER BUDGET':''):
-'Set your project budget to begin.';
-
-$('investmentTotal').textContent=money(t.invested);
-$('availableNow').textContent=money(t.available);
-
-const sourceNames=[
-...sources,
-...new Set(p.investments.map(x=>x.source).filter(x=>x&&!sources.includes(x)))
-];
-
-$('sourceSummary').innerHTML=sourceNames.map(source=>{
-const amount=p.investments
-.filter(x=>x.source===source)
-.reduce((s,x)=>s+Number(x.amount||0),0);
-
-return `<div class="entry row"><b>${esc(source)}</b><b>${money(amount)}</b></div>`;
-}).join('');
-
-$('investmentList').innerHTML=p.investments.length?
-p.investments.map((v,i)=>`
-<div class="entry">
-<div class="row"><b>${money(v.amount)}</b><b>${esc(v.date)}</b></div>
-<div class="muted">${esc(v.source)} ${v.name?' · '+esc(v.name):''}</div>
-<div>${esc(v.purpose||'')}</div>
-<button data-invdel="${i}">Delete</button>
-</div>
-`).join(''):'No investments recorded yet.';
-
-$('workerList').innerHTML=p.workers.length?
-p.workers.map((w,i)=>`
-<div class="entry row">
-<div><b>${esc(w.name)}</b>
-<div class="muted">${esc(w.trade)} · ${esc(w.basis)} · ${money(w.rate)}</div></div>
-<button data-rw="${i}">Remove</button>
-</div>
-`).join(''):'No workers registered yet.';
-
-$('stageList').innerHTML=p.stages.map((s,i)=>`
-<div class="entry">
-<div class="row"><b>${esc(s[0])}</b><b>${Number(s[1])||0}%</b></div>
-<input type="range" min="0" max="100" step="5" value="${Number(s[1])||0}" data-stage="${i}">
-</div>
-`).join('');
-
-const overall=Math.round(
-p.stages.reduce((s,x)=>s+(Number(x[1])||0),0)/
-Math.max(1,p.stages.length)
-);
-
-$('overall').textContent='Overall Progress: '+overall+'%';
-
-const filter=$('filter').value;
-
-const entries=p.entries.map((e,i)=>({...e,index:i}))
-.filter(e=>filter==='All'||e.kind===filter)
-.reverse();
-
-$('historyList').innerHTML=entries.length?
-entries.map(e=>`
-<div class="entry">
-<div class="row"><b>${esc(e.item)}</b><b>${money(e.amount)}</b></div>
-<div class="
-">${esc(e.date)} · ${esc(e.kind)} · ${esc(e.payee||'')}</div>
-<div>${esc(e.notes||'')}</div>
-<button data-del="${e.index}">Delete</button>
-</div>
-`).join(''):'No matching transactions.';
-
-}
-      // PROJECT SELECTION
-$('projectSelect').addEventListener('change',()=>{
-state.activeId=$('projectSelect').value;
-persist();
-});
-
-$('projectButtons').addEventListener('click',e=>{
-const btn=e.target.closest('[data-project]');
-if(!btn)return;
-state.activeId=btn.dataset.project;
-persist();
-});
-
-// ADD PROJECT
-$('addProject').onclick=()=>{
-const name=prompt('Enter the name of the new project:');
-if(name===null)return;
-if(!name.trim())return alert('Enter a project name.');
-const p=blankProject(name.trim());
-state.projects.push(p);
-state.activeId=p.id;
-persist();
-};
-
-// RENAME PROJECT
-$('renameProject').onclick=()=>{
-const p=active();
-const name=prompt('Enter new project name:',p.name);
-if(name===null)return;
-if(!name.trim())return alert('Project name cannot be empty.');
-p.name=name.trim();
-persist();
-};
-
-// SET BUDGET
-$('setbudget').onclick=()=>{
-const p=active();
-const value=prompt('Enter project budget in GH₵:',p.budget||'');
-if(value===null)return;
-const amount=Number(value);
-if(!Number.isFinite(amount)||amount<0){
-alert('Enter a valid amount.');
-return;
-}
-p.budget=amount;
-persist();
-};
-
-// NAVIGATION BUTTONS
-document.querySelectorAll('[data-tab]').forEach(btn=>{
-btn.addEventListener('click',()=>{
-document.querySelectorAll('[data-tab]').forEach(b=>{
-b.setAttribute('aria-selected',String(b===btn));
-});
-['expense','investment','workers','progress','records'].forEach(id=>{
-$(id).hidden=id!==btn.dataset.tab;
-});
-});
-});
-
-// RECORD EXPENSE
-$('expenseForm').onsubmit=e=>{
-e.preventDefault();
-
-const p=active();
-const amount=Number($('amount').value);
-const qty=$('qty').value;
-
-if(!Number.isFinite(amount)||amount<=0){
-alert('Enter a valid amount.');
-return;
-}
-
-p.entries.push({
-kind:$('kind').value,
-date:$('date').value,
-item:$('item').value.trim(),
-qty:qty,
-unit:$('unit').value.trim(),
-amount:amount,
-payee:$('payee').value.trim(),
-notes:$('notes').value.trim()
-});
-
-e.target.reset();
-$('date').value=today();
-persist();
-
-$('message').textContent='Expense saved successfully.';
-};
-
-// ADD INVESTMENT
-$('investmentForm').onsubmit=e=>{
-e.preventDefault();
-
-const p=active();
-const amount=Number($('invAmount').value);
-
-if(!Number.isFinite(amount)||amount<=0){
-alert('Enter a valid investment amount.');
-return;
-}
-
-p.investments.push({
-date:$('invDate').value,
-amount:amount,
-source:$('invSource').value,
-name:$('invName').value.trim(),
-purpose:$('invPurpose').value.trim(),
-notes:$('invNotes').value.trim()
-});
-
-e.target.reset();
-$('invDate').value=today();
-
-persist();
-$('message').textContent='Investment recorded successfully.';
-};
-
-// REGISTER LABOURER
-$('workerForm').onsubmit=e=>{
-e.preventDefault();
-
-const p=active();
-const rate=Number($('rate').value||0);
-
-if(!Number.isFinite(rate)||rate<0){
-alert('Enter a valid rate.');
-return;
-}
-
-p.workers.push({
-name:$('workerName').value.trim(),
-trade:$('trade').value.trim(),
-rate:rate,
-basis:$('basis').value
-});
-
-e.target.reset();
-persist();
-
-$('message').textContent='Labourer registered successfully.';
-};
-
-// UPDATE CONSTRUCTION PROGRESS
-$('stageList').addEventListener('input',e=>{
-if(e.target.dataset.stage===undefined)return;
-
-const index=Number(e.target.dataset.stage);
-active().stages[index][1]=Number(e.target.value);
-
-persist();
-});
-
-// FILTER TRANSACTIONS
-$('filter').addEventListener('change',render);
-
-// DELETE RECORDS
-document.addEventListener('click',e=>{
-const p=active();
-
-if(e.target.dataset.del!==undefined){
-if(confirm('Delete this expense record?')){
-p.entries.splice(Number(e.target.dataset.del),1);
-persist();
-}
-}
-
-if(e.target.dataset.invdel!==undefined){
-if(confirm('Delete this investment record?')){
-p.investments.splice(Number(e.target.dataset.invdel),1);
-persist();
-}
-}
-
-if(e.target.dataset.rw!==undefined){
-if(confirm('Remove this labourer?')){
-p.workers.splice(Number(e.target.dataset.rw),1);
-persist();
-}
-}
-});
-
-// DOWNLOAD FILE
-function download(content,filename,type){
-const blob=new Blob([content],{type:type});
-const url=URL.createObjectURL(blob);
-const a=document.createElement('a');
-
-a.href=url;
-a.download=filename;
-
-document.body.appendChild(a);
-a.click();
-a.remove();
-
-setTimeout(()=>URL.revokeObjectURL(url),1500);
-}
-
-// BACKUP ALL PROJECTS
-$('backup').onclick=()=>{
-download(
-JSON.stringify(state,null,2),
-'amoako-all-projects-backup.json',
-'application/json'
-);
-};
-
-// EXPORT CURRENT PROJECT CSV
-$('csv').onclick=()=>{
-const p=active();
-
-const rows=[
-['Date','Category','Description','Quantity','Unit','Amount GHS','Recipient','Notes'],
-
-...p.entries.map(e=>[
-e.date,e.kind,e.item,e.qty,e.unit,e.amount,e.payee,e.notes
-]),
-
-...p.investments.map(v=>[
-v.date,'Investment',v.purpose,'','',v.amount,v.name,v.source
-])
-];
-
-const csv='\ufeff'+rows.map(row=>
-row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')
-).join('\r\n');
-
-download(
-csv,
-(p.name.replace(/[^a-z0-9_-]/gi,'_')||'project')+'-transactions.csv',
-'text/csv;charset=utf-8'
-);
-};
-
-// RESTORE BACKUP
-$('restore').onchange=async e=>{
-const file=e.target.files[0];
-if(!file)return;
-
-try{
-const data=JSON.parse(await file.text());
-
-if(!Array.isArray(data.projects)||!data.projects.length){
-throw new Error('Invalid backup file.');
-}
-
-if(confirm('Replace all current project records with this backup?')){
-state={
-projects:data.projects.map(normalizeProject),
-activeId:data.projects[0].id
-};
-
-persist();
-$('message').textContent='Backup restored successfully.';
-}
-
-}catch(err){
-$('message').textContent='Restore failed: '+err.message;
-}
-
-e.target.value='';
-};
-
-// PDF REPORT
-$('print').onclick=()=>{
-const p=active();
-const t=totals(p);
-
-const expenses=p.entries.map(e=>`
-<tr>
-<td>${esc(e.date)}</td>
-<td>${esc(e.kind)}</td>
-<td>${esc(e.item)}</td>
-<td>${esc(e.payee||'')}</td>
-<td>${money(e.amount)}</td>
-</tr>
-`).join('');
-
-const investments=p.investments.map(v=>`
-<tr>
-<td>${esc(v.date)}</td>
-<td>${esc(v.source)}</td>
-<td>${esc(v.name||'')}</td>
-<td>${esc(v.purpose||'')}</td>
-<td>${money(v.amount)}</td>
-</tr>
-`).join('');
-
-const workers=p.workers.map(w=>`
-<tr>
-<td>${esc(w.name)}</td>
-<td>${esc(w.trade)}</td>
-<td>${esc(w.basis)}</td>
-<td>${money(w.rate)}</td>
-</tr>
-`).join('');
-
-const stages=p.stages.map(s=>`
-<tr><td>${esc(s[0])}</td><td>${Number(s[1])||0}%</td></tr>
-`).join('');
-
-const w=window.open('','_blank');
-
-if(!w){
-alert('Please allow pop-ups to print the PDF report.');
-return;
-}
-
-w.document.write(`
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${esc(p.name)} Report</title>
-<style>
-body{font-family:Arial,sans-serif;padding:25px;color:#222}
-h1{background:#174b3a;color:white;padding:20px}
-h2{color:#174b3a;margin-top:25px}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.box{border:1px solid #ddd;padding:12px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:8px;text-align:left}
-th{background:#eaf1ed}
-@media print{body{padding:0}}
-</style>
-</head>
-<body>
-
-<h1>AMOAKO BUILDING MANAGER</h1>
-<h2>${esc(p.name)}</h2>
-<p>Construction and Financial Report</p>
-<p>Report date: ${new Date().toLocaleDateString()}</p>
-
-<div class="cards">
-<div class="box"><b>Project Budget</b><h2>${money(p.budget)}</h2></div>
-<div class="box"><b>Total Investment</b><h2>${money(t.invested)}</h2></div>
-<div class="box"><b>Total Expenditure</b><h2>${money(t.spent)}</h2></div>
-<div class="box"><b>Available Funds</b><h2>${money(t.available)}</h2></div>
-</div>
-
-<h2>Investment History</h2>
-<table>
-<tr><th>Date</th><th>Source</th><th>Contributor</th><th>Purpose</th><th>Amount</th></tr>
-${investments}
-</table>
-
-<h2>Expense History</h2>
-<table>
-<tr><th>Date</th><th>Category</th><th>Description</th><th>Recipient</th><th>Amount</th></tr>
-${expenses}
-</table>
-
-<h2>Labourers Register</h2>
-<table>
-<tr><th>Name</th><th>Trade</th><th>Payment Basis</th><th>Rate</th></tr>
-${workers}
-</table>
-
-<h2>Construction Progress</h2>
-<table>
-<tr><th>Stage</th><th>Completion</th></tr>
-${stages}
-</table>
-
-<br><br>
-<p>Prepared by: __________________________</p>
-<p>Checked by: ___________________________</p>
-
-<script>
-window.onload=()=>setTimeout(()=>window.print(),500);
-<\/script>
-
-</body>
-</html>
-`);
-
-w.document.close();
-};
-
-// INITIAL DISPLAY
-persist();
-
+$('usageForm').onsubmit=e=>{e.preventDefault();project().usages.push({division:division==='All'?'Main Building':division,date:$('uDate').value,item:$('uItem').value,qty:Number($('uQty').value),unit:$('uUnit').value.trim(),purpose:$('uPurpose').value});e.target.reset();$('uDate').value=today();save();$('message').textContent='Material usage saved.'};
+$('otherForm').onsubmit=e=>{e.preventDefault();let amount=Number($('oAmount').value);project().records.push({type:'Other',division:division==='All'?'Main Building':division,date:$('oDate').value,item:$('oCategory').value+' — '+$('oDesc').value,total:amount,paid:amount,payee:$('oPayee').value,notes:$('oNotes').value});e.target.reset();$('oDate').value=today();save()};
+$('investmentForm').onsubmit=e=>{e.preventDefault();project().investments.push({date:$('iDate').value,amount:Number($('iAmount').value),source:$('iSource').value,from:$('iFrom').value,purpose:$('iPurpose').value,notes:$('iNotes').value});e.target.reset();$('iDate').value=today();save()};
+$('diaryForm').onsubmit=e=>{e.preventDefault();project().diary.push({division:division==='All'?'Main Building':division,date:$('dDate').value,workers:$('dWorkers').value,work:$('dWork').value,materials:$('dMaterials').value,issues:$('dIssues').value});e.target.reset();$('dDate').value=today();save()};
+$('progressList').oninput=e=>{let v=e.target.dataset.progress;if(v){let [d,s]=v.split('|');project().progress[d][s]=Number(e.target.value);save()}};
+$('recordFilter').onchange=$('divisionFilter').onchange=render;
+document.addEventListener('click',e=>{let p=project();if(e.target.dataset.delRecord!==undefined&&confirm('Delete this expense record?')){p.records.splice(Number(e.target.dataset.delRecord),1);save()}if(e.target.dataset.delInvest!==undefined&&confirm('Delete this investment record?')){p.investments.splice(Number(e.target.dataset.delInvest),1);save()}});
+const download=(content,name,type)=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)};
+$('backup').onclick=()=>download(JSON.stringify(state,null,2),'amoako-building-manager-full-backup.json','application/json');
+$('csv').onclick=()=>{let p=project(),rows=[['Project','Division','Date','Type','Item','Quantity','Unit','Total Cost','Amount Paid','Outstanding','Supplier / Payee','Notes'],...p.records.map(r=>[p.name,r.division,r.date,r.type,r.item,r.qty,r.unit,r.total,r.paid,r.total-r.paid,r.payee,r.notes])];download('\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),'amoako-transactions.csv','text/csv;charset=utf-8')};
+$('restore').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.projects)||!d.projects.length)throw Error('This is not a valid Amoako backup.');if(confirm('Replace all current projects and records with this backup? Download a backup first.')){state={projects:d.projects.map(normal),activeId:d.activeId||d.projects[0].id};save();$('message').textContent='Backup restored.'}}catch(err){$('message').textContent='Restore failed: '+err.message}e.target.value=''};
+$('pdf').onclick=()=>{let p=project(),r=p.records,tot=spent(p),iv=invested(p),lines=r.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.division)}</td><td>${esc(x.type)}</td><td>${esc(x.item)}</td><td>${x.qty||''} ${esc(x.unit||'')}</td><td>${money(x.total)}</td><td>${money(x.paid)}</td><td>${money(x.total-x.paid)}</td></tr>`).join(''),stock=[...new Set([...r.filter(x=>x.type==='Material').map(x=>x.item+'|'+x.unit),...p.usages.map(x=>x.item+'|'+x.unit)])].map(k=>{let [item,unit]=k.split('|'),b=r.filter(x=>x.type==='Material'&&x.item===item&&x.unit===unit).reduce((s,x)=>s+x.qty,0),u=p.usages.filter(x=>x.item===item&&x.unit===unit).reduce((s,x)=>s+x.qty,0);return `<tr><td>${esc(item)}</td><td>${esc(unit)}</td><td>${b}</td><td>${u}</td><td>${b-u}</td></tr>`}).join('');let w=window.open('','_blank');if(!w){alert('Allow pop-ups to create the PDF report.');return}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Amoako report</title><style>body{font:12px Arial;margin:25px;color:#222}h1{background:#174b3a;color:white;padding:18px}h2{color:#174b3a;margin-top:25px}table{width:100%;border-collapse:collapse;margin:10px 0}td,th{border:1px solid #ccc;padding:7px;text-align:left}th{background:#eaf2ed}.stats{display:flex;gap:10px}.stats div{border:1px solid #ccc;padding:10px;flex:1}@page{size:A4 landscape;margin:12mm}</style></head><body><h1>AMOAKO BUILDING MANAGER<br><small>${esc(p.name)} — Complete Construction Report</small></h1><p>Generated: ${new Date().toLocaleString('en-GH')}</p><div class="stats"><div>Budget<br><b>${money(p.budget)}</b></div><div>Investments<br><b>${money(iv)}</b></div><div>Expenditure<br><b>${money(tot)}</b></div><div>Available funds<br><b>${money(iv-tot)}</b></div></div><h2>Detailed financial records</h2><table><tr><th>Date</th><th>Division</th><th>Type</th><th>Description</th><th>Quantity</th><th>Total cost</th><th>Paid</th><th>Outstanding</th></tr>${lines||'<tr><td colspan="8">No records</td></tr>'}</table><h2>Material stock summary</h2><table><tr><th>Material</th><th>Unit</th><th>Purchased</th><th>Used</th><th>Balance</th></tr>${stock||'<tr><td colspan="5">No materials recorded</td></tr>'}</table><h2>Investments</h2><table><tr><th>Date</th><th>Source</th><th>Contributor</th><th>Purpose</th><th>Amount</th></tr>${p.investments.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.source)}</td><td>${esc(x.from)}</td><td>${esc(x.purpose)}</td><td>${money(x.amount)}</td></tr>`).join('')}</table><script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);w.document.close()};
+render();switchTab('purchase');
 })();
 </script>
 </body>
