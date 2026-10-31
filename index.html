@@ -23,67 +23,33 @@ label{display:block;margin:10px 0 5px;font-size:13px;color:var(--muted)}.two{dis
 .entry{border-bottom:1px solid var(--line);padding:11px 0}.entry:last-child{border:0}
 .bar{height:9px;background:#e4ebe7;border-radius:20px;overflow:hidden;margin-top:10px}.bar>div{height:100%;background:#24845e;width:0}
 section[hidden]{display:none}.full{width:100%;margin-top:12px}.stage{margin:12px 0}.small{font-size:12px;color:var(--muted)}
-.project-select{min-width:210px;flex:1}
+.project-select{min-width:210px;flex:1}.project-choice[aria-pressed=true]{background:var(--green);color:white;border-color:var(--green)}.notice{background:#edf5f0;border:1px solid #cfe0d5;padding:10px;border-radius:9px;margin:10px 0;font-size:13px}
 hr{border:0;border-top:1px solid var(--line);margin:13px 0}
 @media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.metric{font-size:18px}.wrap{padding:10px}.project-select{width:100%}}
 </style>
 </head>
 <body>
-
-<header>
-<div class="wrap">
-<h1>Amoako Building Manager</h1>
-<p>Multiple construction projects · Investments · Labourers · Materials · Site progress · Ghana cedi (GH₵)</p>
-</div>
-</header>
-
+<header><div class="wrap"><h1>Amoako Building Manager</h1><p>Multiple construction projects · Investments · Labourers · Materials · Site progress · Ghana cedi (GH₵)</p></div></header>
 <main class="wrap">
-
 <div class="card">
- <div class="row">
-  <b>Choose project</b>
-  <button id="addProject" type="button">＋ Add project</button>
- </div>
- <div class="row" style="margin-top:8px">
-  <select id="projectSelect" class="project-select" aria-label="Select project"></select>
-  <button id="renameProject" type="button">Rename</button>
- </div>
- <div class="small" id="projectHint" style="margin-top:7px">
- This dashboard shows only the selected project. Switch projects above to view the other project's separate dashboard and records.
- </div>
+ <div class="row"><b>Choose project</b><button id="addProject" type="button">＋ Add project</button></div>
+ <div class="row" style="margin-top:8px"><select id="projectSelect" class="project-select" aria-label="Select project"></select><button id="renameProject" type="button">Rename</button></div>
+ <div id="projectButtons" class="row" style="justify-content:flex-start;margin-top:10px" aria-label="Project selection buttons"></div>
+ <div class="small" id="projectHint" style="margin-top:7px">This dashboard shows only the selected project. Switch projects above to view the other project's separate dashboard and records.</div>
 </div>
-
 <div class="card">
- <div class="row">
-  <b>Project budget</b>
-  <button id="setbudget" type="button">Set / edit budget</button>
- </div>
+ <div class="row"><b>Project budget</b><button id="setbudget" type="button">Set / edit budget</button></div>
  <div class="metric" id="budgetDisplay">GH₵0.00</div>
  <div class="muted">Total expenditure: <b id="spent">GH₵0.00</b></div>
  <div class="muted">Total money invested: <b id="invested">GH₵0.00</b> · Available funds now: <b id="available">GH₵0.00</b></div>
- <div class="bar"><div id="bar"></div></div>
- <div class="muted" id="budgetNote">Set your project budget to begin.</div>
+ <div class="bar"><div id="bar"></div></div><div class="muted" id="budgetNote">Set your project budget to begin.</div>
 </div>
-
 <div class="grid">
- <div class="card">
-  <div class="muted">Materials</div>
-  <div class="metric" id="materials">GH₵0.00</div>
- </div>
- <div class="card">
-  <div class="muted">Labour</div>
-  <div class="metric" id="labour">GH₵0.00</div>
- </div>
- <div class="card">
-  <div class="muted">Other expenses</div>
-  <div class="metric" id="other">GH₵0.00</div>
- </div>
- <div class="card">
-  <div class="muted">Budget balance</div>
-  <div class="metric" id="balance">GH₵0.00</div>
- </div>
+ <div class="card"><div class="muted">Materials</div><div class="metric" id="materials">GH₵0.00</div></div>
+ <div class="card"><div class="muted">Labour</div><div class="metric" id="labour">GH₵0.00</div></div>
+ <div class="card"><div class="muted">Other expenses</div><div class="metric" id="other">GH₵0.00</div></div>
+ <div class="card"><div class="muted">Budget balance</div><div class="metric" id="balance">GH₵0.00</div></div>
 </div>
-
 <nav class="tabs" aria-label="Sections">
  <button class="tab" data-tab="expense" aria-selected="true" type="button">Record expense</button>
  <button class="tab" data-tab="investment" aria-selected="false" type="button">Add investment</button>
@@ -91,376 +57,146 @@ hr{border:0;border-top:1px solid var(--line);margin:13px 0}
  <button class="tab" data-tab="progress" aria-selected="false" type="button">Site progress</button>
  <button class="tab" data-tab="records" aria-selected="false" type="button">Records</button>
 </nav>
-
-<section id="expense" class="card">
-<h2>Record a purchase or payment</h2>
+<section id="expense" class="card"><h2>Record a purchase or payment</h2>
 <form id="expenseForm">
-
-<label for="kind">Category</label>
-<select id="kind">
-<option>Materials</option>
-<option>Labour</option>
-<option>Other</option>
-</select>
-
-<div class="two">
-<div>
-<label for="date">Date</label>
-<input id="date" type="date" required>
-</div>
-<div>
-<label for="amount">Amount paid (GH₵)</label>
-<input id="amount" type="number" min="0.01" step="0.01" required placeholder="0.00">
-</div>
-</div>
-
-<label for="item">Item / worker / description</label>
-<input id="item" required placeholder="e.g. Cement, 100 bags">
-
-<div class="two">
-<div>
-<label for="qty">Quantity (optional)</label>
-<input id="qty" type="number" min="0" step="any">
-</div>
-<div>
-<label for="unit">Unit (optional)</label>
-<input id="unit" placeholder="bags, trips, days">
-</div>
-</div>
-
-<label for="payee">Supplier / recipient</label>
-<input id="payee" placeholder="Name (optional)">
-
-<label for="notes">Notes / receipt details</label>
-<textarea id="notes" rows="2"></textarea>
-
-<button class="primary full">Save transaction</button>
-</form>
-</section>
-
-<section id="investment" class="card" hidden>
-<h2>Record money invested in this project</h2>
+ <label for="kind">Category</label><select id="kind"><option>Materials</option><option>Labour</option><option>Other</option></select>
+ <div class="two"><div><label for="date">Date</label><input id="date" type="date" required></div><div><label for="amount">Amount paid (GH₵)</label><input id="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div></div>
+ <label for="item">Item / worker / description</label><input id="item" required placeholder="e.g. Cement, 100 bags">
+ <div class="two"><div><label for="qty">Quantity (optional)</label><input id="qty" type="number" min="0" step="any"></div><div><label for="unit">Unit (optional)</label><input id="unit" placeholder="bags, trips, days"></div></div>
+ <label for="payee">Supplier / recipient</label><input id="payee" placeholder="Name (optional)">
+ <label for="notes">Notes / receipt details</label><textarea id="notes" rows="2"></textarea>
+ <button class="primary full">Save transaction</button>
+</form></section>
+<section id="investment" class="card" hidden><h2>Record money invested in this project</h2>
 <p class="muted">Investment records are kept separately for each project.</p>
-
 <form id="investmentForm">
-<div class="two">
-<div>
-<label for="invDate">Date received</label>
-<input id="invDate" type="date" required>
-</div>
-<div>
-<label for="invAmount">Amount received (GH₵)</label>
-<input id="invAmount" type="number" min="0.01" step="0.01" required placeholder="0.00">
-</div>
-</div>
-
-<label for="invSource">Source of money</label>
-<select id="invSource">
-<option>Wife</option>
-<option>Loan</option>
-<option>Yearly Susu</option>
-<option>Personal savings</option>
-<option>Gift</option>
-</select>
-
-<label for="invName">Contributor / source name</label>
-<input id="invName" placeholder="Optional name or details">
-
-<label for="invPurpose">Purpose / description</label>
-<input id="invPurpose" placeholder="e.g. Foundation work, cement purchase">
-
-<label for="invNotes">Notes</label>
-<textarea id="invNotes" rows="2"></textarea>
-
-<button class="primary full">Save investment</button>
+ <div class="two"><div><label for="invDate">Date received</label><input id="invDate" type="date" required></div><div><label for="invAmount">Amount received (GH₵)</label><input id="invAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div></div>
+ <label for="invSource">Source of money</label><select id="invSource"><option>Wife</option><option>Loan</option><option>Yearly Susu</option><option>Personal savings</option><option>Gift</option></select>
+ <label for="invName">Contributor / source name</label><input id="invName" placeholder="Optional name or details">
+ <label for="invPurpose">Purpose / description</label><input id="invPurpose" placeholder="e.g. Foundation work, cement purchase">
+ <label for="invNotes">Notes</label><textarea id="invNotes" rows="2"></textarea>
+ <button class="primary full">Save investment</button>
 </form>
-
-<h3>Total money invested by source</h3>
-
-<div class="card">
-<div class="muted">Total money invested</div>
-<div class="metric" id="investmentTotal">GH₵0.00</div>
-<div id="sourceSummary" class="muted"></div>
-<hr>
-<div class="muted">Available funds now</div>
-<div class="metric" id="availableNow">GH₵0.00</div>
-<div class="small">Total investments minus total recorded expenditure.</div>
-</div>
-
-<h3>Investment history</h3>
-<div id="investmentList" class="muted">No investments recorded yet.</div>
+<h3>Total money invested by source</h3><div class="card"><div class="muted">Total money invested</div><div class="metric" id="investmentTotal">GH₵0.00</div><div id="sourceSummary" class="muted"></div><hr><div class="muted">Available funds now</div><div class="metric" id="availableNow">GH₵0.00</div><div class="small">Total investments minus total recorded expenditure.</div></div>
+<h3>Investment history</h3><div id="investmentList" class="muted">No investments recorded yet.</div>
 </section>
-
-<section id="workers" class="card" hidden>
-<h2>Labourers register</h2>
-
-<form id="workerForm">
-<label for="workerName">Worker / contractor name</label>
-<input id="workerName" required>
-
-<label for="trade">Trade / role</label>
-<input id="trade" required placeholder="Mason, carpenter, labourer">
-
-<div class="two">
-<div>
-<label for="rate">Agreed rate (GH₵)</label>
-<input id="rate" type="number" min="0" step="0.01">
-</div>
-<div>
-<label for="basis">Payment basis</label>
-<select id="basis">
-<option>Per day</option>
-<option>Per week</option>
-<option>Per contract</option>
-<option>Other</option>
-</select>
-</div>
-</div>
-
-<button class="primary full">Add labourer</button>
-</form>
-
-<h3>Registered workers</h3>
-<div id="workerList" class="muted">No workers registered yet.</div>
-<p class="small">Record actual payments under Record expense → Labour.</p>
-</section>
-
-<section id="progress" class="card" hidden>
-<h2>Construction progress</h2>
-<p class="muted">Move each slider as work is completed.</p>
-<div id="stageList"></div>
-<b id="overall">Overall progress: 0%</b>
-</section>
-
-<section id="records" class="card" hidden>
-<div class="row">
-<h2>Transaction history</h2>
-<select id="filter" style="width:auto">
-<option>All</option>
-<option>Materials</option>
-<option>Labour</option>
-<option>Other</option>
-</select>
-</div>
-<div id="historyList" class="muted">No transactions yet.</div>
-</section>
-
-<div class="card">
-<h3>Backup and reports</h3>
-<p class="muted">Download a backup regularly. The backup includes every project. Records are stored on this device and are not automatically shared with other phones.</p>
-
-<div class="row">
-<button id="backup" type="button">Download all-project backup</button>
-<button id="csv" type="button">Export current project CSV</button>
-<button id="print" class="primary" type="button">Print / Save PDF report</button>
-</div>
-
-<label for="restore">Restore a backup file</label>
-<input id="restore" type="file" accept="application/json">
-<p id="message" class="muted" aria-live="polite"></p>
-</div>
-
+<section id="workers" class="card" hidden><h2>Labourers register</h2>
+<form id="workerForm"><label for="workerName">Worker / contractor name</label><input id="workerName" required><label for="trade">Trade / role</label><input id="trade" required placeholder="Mason, carpenter, labourer">
+ <div class="two"><div><label for="rate">Agreed rate (GH₵)</label><input id="rate" type="number" min="0" step="0.01"></div><div><label for="basis">Payment basis</label><select id="basis"><option>Per day</option><option>Per week</option><option>Per contract</option><option>Other</option></select></div></div>
+ <button class="primary full">Add labourer</button></form><h3>Registered workers</h3><div id="workerList" class="muted">No workers registered yet.</div><p class="small">Record actual payments under Record expense → Labour.</p></section>
+<section id="progress" class="card" hidden><h2>Construction progress</h2><p class="muted">Move each slider as work is completed.</p><div id="stageList"></div><b id="overall">Overall progress: 0%</b></section>
+<section id="records" class="card" hidden><div class="row"><h2>Transaction history</h2><select id="filter" style="width:auto"><option>All</option><option>Materials</option><option>Labour</option><option>Other</option></select></div><div id="historyList" class="muted">No transactions yet.</div></section>
+<div class="card"><h3>Backup and reports</h3><p class="muted">Download a backup regularly. The backup includes every project. Records are stored on this device and are not automatically shared with other phones.</p>
+<div class="row"><button id="backup" type="button">Download all-project backup</button><button id="csv" type="button">Export current project CSV</button><button id="print" class="primary" type="button">Print / Save PDF report</button></div>
+<label for="restore">Restore a backup file</label><input id="restore" type="file" accept="application/json"><p id="message" class="muted" aria-live="polite"></p></div>
 <p class="small">Offline-ready after the first successful visit. Keep a backup before clearing browser data or changing phones.</p>
-
 </main>
-
 <script>
-(()=>{'use strict';
-
+ (()=>{'use strict';
 const $=id=>document.getElementById(id);
-
-const LEGACY_KEY='buildingProjectManager_v1';
-const KEY='amoakoBuildingManager_multi_v2';
-
+const LEGACY_KEY='buildingProjectManager_v1',KEY='amoakoBuildingManager_multi_v2';
 const PROJECT1_SOURCES=['SUSU','MOTOR SALES','LOAN'];
 const PROJECT2_SOURCES=['Wife','Loan','Yearly Susu','Personal savings','Gift'];
-
-const sourcesFor=p=>(
- p.id==='amoako_project_1'
- ? PROJECT1_SOURCES
- : PROJECT2_SOURCES
-);
-
-const defaultStages=[
-['Land preparation',0],
-['Foundation',0],
-['Ground floor blockwork',0],
-['Lintel and roofing',0],
-['Upper floor / structural work',0],
-['Plastering',0],
-['Electrical and plumbing',0],
-['Flooring and tiling',0],
-['Painting and finishing',0],
-['Doors, windows and fittings',0]
-];
-
-const blankProject=name=>({
- id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
- name,
- budget:0,
- entries:[],
- investments:[],
- workers:[],
- stages:defaultStages.map(x=>[...x])
-});
-
-function normalizeProject(p){
- return {
-  ...blankProject(p.name||'Building Project'),
-  ...p,
-  id:p.id||('p_'+Math.random().toString(36).slice(2)),
-  name:p.name||'Building Project',
-  budget:Number(p.budget)||0,
-  entries:Array.isArray(p.entries)?p.entries:[],
-  investments:Array.isArray(p.investments)?p.investments:[],
-  workers:Array.isArray(p.workers)?p.workers:[],
-  stages:Array.isArray(p.stages)?p.stages:defaultStages.map(x=>[...x])
- };
-}
-
+const sourcesFor=p=>(p.id==='amoako_project_1'?PROJECT1_SOURCES:PROJECT2_SOURCES);
+const defaultStages=[['Land preparation',0],['Foundation',0],['Ground floor blockwork',0],['Lintel and roofing',0],['Upper floor / structural work',0],['Plastering',0],['Electrical and plumbing',0],['Flooring and tiling',0],['Painting and finishing',0],['Doors, windows and fittings',0]];
+const blankProject=(name)=>({id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),name,budget:0,entries:[],investments:[],workers:[],stages:defaultStages.map(x=>[...x])});
+function normalizeProject(p){return {...blankProject(p.name||'Building Project'),...p,id:p.id||('p_'+Math.random().toString(36).slice(2)),name:p.name||'Building Project',budget:Number(p.budget)||0,entries:Array.isArray(p.entries)?p.entries:[],investments:Array.isArray(p.investments)?p.investments:[],workers:Array.isArray(p.workers)?p.workers:[],stages:Array.isArray(p.stages)?p.stages:defaultStages.map(x=>[...x])};}
 function loadState(){
  try{
   const current=JSON.parse(localStorage.getItem(KEY)||'null');
   if(current&&Array.isArray(current.projects)&&current.projects.length){
-   return {
-    projects:current.projects.map(normalizeProject),
-    activeId:current.activeId||current.projects[0].id
-   };
+   const projects=current.projects.map(normalizeProject);
+   if(!projects.some(p=>p.id==='amoako_project_1')){
+    projects[0].id='amoako_project_1';
+    if(!projects[0].name)projects[0].name='Amoako Building Project';
+   }
+   if(!projects.some(p=>p.id==='amoako_project_2')){
+    const second=blankProject('Project 2');
+    second.id='amoako_project_2';
+    projects.push(second);
+   }
+   const activeId=projects.some(p=>p.id===current.activeId)?current.activeId:projects[0].id;
+   const migrated={projects,activeId};
+   try{localStorage.setItem(KEY,JSON.stringify(migrated));}catch(e){}
+   return migrated;
   }
  }catch(e){}
-
- let old={};
- try{
-  old=JSON.parse(localStorage.getItem(LEGACY_KEY)||'{}');
- }catch(e){}
-
- const first=normalizeProject({
-  id:'amoako_project_1',
-  name:'Amoako Building Project',
-  budget:old.budget||0,
-  entries:old.entries||[],
-  investments:old.investments||[],
-  workers:old.workers||[],
-  stages:old.stages||defaultStages.map(x=>[...x])
- });
-
+ let old={};try{old=JSON.parse(localStorage.getItem(LEGACY_KEY)||'{}')}catch(e){}
+ const first=normalizeProject({id:'amoako_project_1',name:'Amoako Building Project',budget:old.budget||0,entries:old.entries||[],investments:old.investments||[],workers:old.workers||[],stages:old.stages||defaultStages.map(x=>[...x])});
  const second=blankProject('Project 2');
-
- const state={
-  projects:[first,second],
-  activeId:first.id
- };
-
- try{
-  localStorage.setItem(KEY,JSON.stringify(state));
- }catch(e){}
-
+ const state={projects:[first,second],activeId:first.id};
+ try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
  return state;
 }
-
 let state=loadState();
-
 let active=()=>state.projects.find(p=>p.id===state.activeId)||state.projects[0];
-
-const money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{
- minimumFractionDigits:2,
- maximumFractionDigits:2
-});
-
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({
- '&':'&amp;',
- '<':'&lt;',
- '>':'&gt;',
- '"':'&quot;',
- "'":'&#39;'
-}[c]));
-
-const today=()=>{
- const d=new Date();
- return [
-  d.getFullYear(),
-  String(d.getMonth()+1).padStart(2,'0'),
-  String(d.getDate()).padStart(2,'0')
- ].join('-');
-};
-
-$('date').value=today();
-$('invDate').value=today();
-
-function totals(p){
- const spent=p.entries.reduce((s,e)=>s+Number(e.amount||0),0);
- const invested=p.investments.reduce((s,x)=>s+Number(x.amount||0),0);
- return {
-  spent,
-  invested,
-  available:invested-spent
- };
-}
-
-function persist(){
- try{
-  localStorage.setItem(KEY,JSON.stringify(state));
-  render();
- }catch(err){
-  alert('Could not save on this device. Download a backup and check available storage.');
- }
-}
-
+const money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+$('date').value=today();$('invDate').value=today();
+function totals(p){const spent=p.entries.reduce((s,e)=>s+Number(e.amount||0),0),invested=p.investments.reduce((s,x)=>s+Number(x.amount||0),0);return {spent,invested,available:invested-spent};}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));render();}catch(err){alert('Could not save on this device. Download a backup and check available storage.');}}
 function render(){
-
- $('projectSelect').innerHTML=state.projects.map(p=>
-  `<option value="${esc(p.id)}">${esc(p.name)}</option>`
+ $('projectSelect').innerHTML=state.projects.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');$('projectSelect').value=active().id;
+ $('projectButtons').innerHTML=state.projects.map(p=>
+  `<button type="button" class="project-choice" data-project="${esc(p.id)}" aria-pressed="${p.id===active().id?'true':'false'}">${esc(p.name)}</button>`
  ).join('');
-
- $('projectSelect').value=active().id;
-
- const currentSource=$('invSource').value;
- const sourceChoices=sourcesFor(active());
-
- $('invSource').innerHTML=sourceChoices.map(s=>
-  `<option>${esc(s)}</option>`
- ).join('');
-
- if(sourceChoices.includes(currentSource)){
-  $('invSource').value=currentSource;
- }
-
- const p=active();
- const t=totals(p);
- const cats={Materials:0,Labour:0,Other:0};
-
- p.entries.forEach(e=>{
-  const k=cats[e.kind]===undefined?'Other':e.kind;
-  cats[k]+=Number(e.amount||0);
- });
-
+ const currentSource=$('invSource').value,sourceChoices=sourcesFor(active());
+ $('invSource').innerHTML=sourceChoices.map(s=>`<option>${esc(s)}</option>`).join('');
+ if(sourceChoices.includes(currentSource))$('invSource').value=currentSource;
+ const p=active(),t=totals(p),cats={Materials:0,Labour:0,Other:0};
+ p.entries.forEach(e=>{const k=cats[e.kind]===undefined?'Other':e.kind;cats[k]+=Number(e.amount||0)});
  const pct=p.budget?t.spent/p.budget*100:0;
-
- $('budgetDisplay').textContent=money(p.budget);
- $('spent').textContent=money(t.spent);
- $('invested').textContent=money(t.invested);
- $('available').textContent=money(t.available);
-
- $('investmentTotal').textContent=money(t.invested);
- $('availableNow').textContent=money(t.available);
-
- const baseSources=sourcesFor(p);
- const sourceNames=[
-  ...baseSources,
-  ...new Set(p.investments.map(x=>x.source).filter(s=>s&&!baseSources.includes(s)))
- ];
-
- $('sourceSummary').innerHTML=sourceNames.map(source=>{
-  const amount=p.investments
-   .filter(x=>x.source===source)
-   .reduce((sum,x)=>sum+Number(x.amount||0),0);
-
-  return `<div class="entry">
-   <div class="row">
-    <b>${esc(source)}</b>
-    <b>${money(amount)}</b>
-   </div>
-  </div>`;
- }).join('');
-
- $('materials').textContent=money(cats.Materials);
+ $('budgetDisplay').textContent=money(p.budget);$('spent').textContent=money(t.spent);$('invested').textContent=money(t.invested);$('available').textContent=money(t.available);
+ $('investmentTotal').textContent=money(t.invested);$('availableNow').textContent=money(t.available);
+ const baseSources=sourcesFor(p),sourceNames=[...baseSources,...new Set(p.investments.map(x=>x.source).filter(s=>s&&!baseSources.includes(s)))];
+ $('sourceSummary').innerHTML=sourceNames.map(source=>{const amount=p.investments.filter(x=>x.source===source).reduce((sum,x)=>sum+Number(x.amount||0),0);return `<div class="entry"><div class="row"><b>${esc(source)}</b><b>${money(amount)}</b></div></div>`}).join('');
+ $('materials').textContent=money(cats.Materials);$('labour').textContent=money(cats.Labour);$('other').textContent=money(cats.Other);$('balance').textContent=money(p.budget-t.spent);
+ $('bar').style.width=Math.min(100,Math.max(0,pct))+'%';$('budgetNote').textContent=p.budget?`${pct.toFixed(1)}% of budget spent${t.spent>p.budget?' — OVER BUDGET':''}`:'Set your project budget to begin.';
+ $('investmentList').innerHTML=p.investments.length?p.investments.map((v,i)=>`<div class="entry"><div class="row"><b>${money(v.amount)}</b><b>${esc(v.date)}</b></div><div class="muted">${esc(v.source)}${v.name?' · '+esc(v.name):''}</div>${v.purpose?`<div>${esc(v.purpose)}</div>`:''}${v.notes?`<div class="small">${esc(v.notes)}</div>`:''}<button type="button" data-invdel="${i}" style="margin-top:7px">Delete</button></div>`).join(''):'No investments recorded yet.';
+ $('workerList').innerHTML=p.workers.length?p.workers.map((w,i)=>`<div class="entry row"><div><b>${esc(w.name)}</b><div class="muted">${esc(w.trade)} · ${esc(w.basis)} · ${money(w.rate)}</div></div><button type="button" data-rw="${i}">Remove</button></div>`).join(''):'No workers registered yet.';
+ $('stageList').innerHTML=p.stages.map((s,i)=>`<div class="stage"><div class="row"><label>${esc(s[0])}</label><b>${Number(s[1])||0}%</b></div><input aria-label="${esc(s[0])} progress" type="range" min="0" max="100" step="5" value="${Number(s[1])||0}" data-stage="${i}"></div>`).join('');
+ $('overall').textContent='Overall progress: '+Math.round(p.stages.reduce((a,s)=>a+(Number(s[1])||0),0)/Math.max(1,p.stages.length))+'%';
+ const f=$('filter').value,list=p.entries.map((e,i)=>({...e,i})).filter(e=>f==='All'||e.kind===f).reverse();
+ $('historyList').innerHTML=list.length?list.map(e=>`<div class="entry"><div class="row"><b>${esc(e.item)}</b><b>${money(e.amount)}</b></div><div class="muted">${esc(e.date)} · ${esc(e.kind)}${e.qty!==''?' · '+esc(e.qty)+' '+esc(e.unit):''}${e.payee?' · '+esc(e.payee):''}</div>${e.notes?`<div>${esc(e.notes)}</div>`:''}<button type="button" data-del="${e.i}" style="margin-top:7px">Delete</button></div>`).join(''):'No matching transactions.';
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));['expense','investment','workers','progress','records'].forEach(id=>$(id).hidden=id!==b.dataset.tab)}));
+$('projectSelect').onchange=()=>{state.activeId=$('projectSelect').value;persist();};
+$('projectButtons').addEventListener('click',e=>{
+ const button=e.target.closest('[data-project]');
+ if(!button)return;
+ state.activeId=button.dataset.project;
+ persist();
+});
+$('addProject').onclick=()=>{const name=prompt('Enter the name of the new building project:');if(name===null)return;if(!name.trim()){alert('Enter a project name.');return;}const p=blankProject(name.trim());state.projects.push(p);state.activeId=p.id;persist();$('message').textContent='New project created.';};
+$('renameProject').onclick=()=>{const p=active(),name=prompt('Enter a new name for this project:',p.name);if(name===null)return;if(!name.trim()){alert('Project name cannot be empty.');return;}p.name=name.trim();persist();};
+$('setbudget').onclick=()=>{const p=active(),v=prompt('Enter total project budget in GH₵:',p.budget||'');if(v===null)return;const n=Number(v);if(!Number.isFinite(n)||n<0){alert('Enter a valid amount.');return;}p.budget=n;persist();};
+$('expenseForm').onsubmit=e=>{e.preventDefault();const p=active(),amount=Number($('amount').value),qty=$('qty').value;if(!Number.isFinite(amount)||amount<=0||(qty!==''&&(!Number.isFinite(Number(qty))||Number(qty)<0))){alert('Check amount and quantity.');return;}p.entries.push({kind:$('kind').value,date:$('date').value,item:$('item').value.trim(),qty,unit:$('unit').value.trim(),amount,payee:$('payee').value.trim(),notes:$('notes').value.trim()});e.target.reset();$('date').value=today();$('message').textContent='Transaction saved to '+p.name+'.';persist();};
+$('investmentForm').onsubmit=e=>{e.preventDefault();const p=active(),amount=Number($('invAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter a valid amount.');return;}p.investments.push({date:$('invDate').value,amount,source:$('invSource').value,name:$('invName').value.trim(),purpose:$('invPurpose').value.trim(),notes:$('invNotes').value.trim()});e.target.reset();$('invDate').value=today();$('message').textContent='Investment saved to '+p.name+'.';persist();};
+$('workerForm').onsubmit=e=>{e.preventDefault();const p=active(),rate=Number($('rate').value||0);if(!Number.isFinite(rate)||rate<0){alert('Enter a valid rate.');return;}p.workers.push({name:$('workerName').value.trim(),trade:$('trade').value.trim(),rate,basis:$('basis').value});e.target.reset();$('message').textContent='Labourer added to '+p.name+'.';persist();};
+$('stageList').oninput=e=>{if(e.target.dataset.stage!==undefined){active().stages[Number(e.target.dataset.stage)][1]=Number(e.target.value);persist();}};
+$('filter').onchange=render;
+document.addEventListener('click',e=>{const p=active();if(e.target.dataset.del!==undefined&&confirm('Delete this transaction from '+p.name+'?')){p.entries.splice(Number(e.target.dataset.del),1);persist();}if(e.target.dataset.invdel!==undefined&&confirm('Delete this investment record from '+p.name+'?')){p.investments.splice(Number(e.target.dataset.invdel),1);persist();}if(e.target.dataset.rw!==undefined&&confirm('Remove this worker from '+p.name+'?')){p.workers.splice(Number(e.target.dataset.rw),1);persist();}});
+function download(content,name,type){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+$('backup').onclick=()=>download(JSON.stringify(state,null,2),'amoako-all-projects-backup.json','application/json');
+$('csv').onclick=()=>{const p=active(),rows=[['Date','Category','Description','Quantity','Unit','Amount GHS','Recipient','Notes'],...p.entries.map(e=>[e.date,e.kind,e.item,e.qty,e.unit,e.amount,e.payee,e.notes]),...p.investments.map(v=>[v.date,'Investment',v.purpose,'','',v.amount,v.name,v.source+(v.notes?' - '+v.notes:'')])];download('\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),(p.name.replace(/[^a-z0-9_-]/gi,'_')||'project')+'-transactions.csv','text/csv;charset=utf-8');};
+$('restore').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());let incoming;if(Array.isArray(d.projects))incoming=d.projects.map(normalizeProject);else if(Array.isArray(d.entries)&&Array.isArray(d.workers)&&Number.isFinite(d.budget)){incoming=[normalizeProject({id:'restored_project',name:'Restored Project',...d})];}else throw new Error('Invalid backup file');if(!incoming.length)throw new Error('Backup contains no projects');if(confirm('Replace all current project records with this backup? Download a backup of your current records first if needed.')){state={projects:incoming,activeId:incoming[0].id};persist();$('message').textContent='Backup restored.';}}catch(err){$('message').textContent='Could not restore backup: '+err.message;}e.target.value='';};
+$('print').onclick=()=>{
+ const p=active(),t=totals(p),cats=['Materials','Labour','Other'];
+ const expenseTotals=cats.map(k=>[k,p.entries.filter(x=>x.kind===k).reduce((s,x)=>s+Number(x.amount||0),0)]);
+ const baseSources=sourcesFor(p),sourceNames=[...baseSources,...new Set(p.investments.map(x=>x.source).filter(s=>s&&!baseSources.includes(s)))];
+ const sourceTotals=sourceNames.map(k=>[k,p.investments.filter(x=>x.source===k).reduce((s,x)=>s+Number(x.amount||0),0)]);
+ const progress=Math.round(p.stages.reduce((a,s)=>a+(Number(s[1])||0),0)/Math.max(1,p.stages.length));
+ const cell=v=>`<td>${esc(v)}</td>`,table=(heads,rows)=>`<table><thead><tr>${heads.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map(cell).join('')}</tr>`).join(''):`<tr><td colspan="${heads.length}" class="empty">No records available</td></tr>`}</tbody></table>`;
+ const investmentRows=p.investments.map(v=>[v.date,v.source,v.name||'—',v.purpose||'—',money(v.amount)]),expenseRows=p.entries.map(v=>[v.date,v.kind,v.item,v.qty?`${v.qty} ${v.unit||''}`:'—',v.payee||'—',money(v.amount)]),workerRows=p.workers.map(v=>[v.name,v.trade,v.basis,money(v.rate)]),stageRows=p.stages.map(v=>[v[0],`${Number(v[1])||0}%`]);
+ const w=window.open('','_blank');if(!w){alert('Allow pop-ups for this site, then tap Print / Save PDF again.');return;}
+ const report=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(p.name)} Report</title><style>*{box-sizing:border-box}body{font:12px Arial,sans-serif;color:#202b25;margin:0;padding:28px}header{background:#174b3a;color:#fff;padding:22px 25px;border-radius:8px}h1{margin:0 0 5px;font-size:22px}header p{margin:0;color:#e3eee8}h2{font-size:15px;color:#174b3a;margin:24px 0 9px;border-bottom:1px solid #d6e0da;padding-bottom:6px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:15px}.metric{border:1px solid #d6e0da;padding:12px;border-radius:7px}.metric span{display:block;color:#66736b;font-size:10px;margin-bottom:6px}.metric b{font-size:15px}table{width:100%;border-collapse:collapse;margin:7px 0 14px}th{background:#eaf1ed;text-align:left;color:#174b3a}th,td{border:1px solid #d6e0da;padding:7px;vertical-align:top}td.empty{text-align:center;color:#77837c;padding:13px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px}.foot{margin-top:38px;display:flex;justify-content:space-between}.sign{border-top:1px solid #68756d;width:42%;padding-top:7px}.date{color:#66736b;font-size:10px;margin-top:16px}@page{size:A4;margin:14mm}@media print{body{padding:0}header,th{print-color-adjust:exact;-webkit-print-color-adjust:exact}tr{break-inside:avoid}}</style></head><body><header><h1>AMOAKO BUILDING MANAGER</h1><p>${esc(p.name)} — Financial &amp; Construction Progress Report</p></header><p class="date">Report generated: ${esc(new Date().toLocaleString('en-GH'))}</p><div class="cards"><div class="metric"><span>PROJECT BUDGET</span><b>${money(p.budget)}</b></div><div class="metric"><span>TOTAL INVESTED</span><b>${money(t.invested)}</b></div><div class="metric"><span>TOTAL EXPENDITURE</span><b>${money(t.spent)}</b></div><div class="metric"><span>AVAILABLE FUNDS</span><b>${money(t.available)}</b></div></div><div class="twocol"><div><h2>Expenditure breakdown</h2>${table(['Category','Amount'],expenseTotals.map(r=>[r[0],money(r[1])]))}</div><div><h2>Investment by source</h2>${table(['Source','Amount'],sourceTotals.map(r=>[r[0],money(r[1])]))}</div></div><h2>Investment records</h2>${table(['Date','Source','Contributor','Purpose','Amount'],investmentRows)}<h2>Detailed expenditure records</h2>${table(['Date','Category','Description','Quantity','Paid to','Amount'],expenseRows)}<h2>Registered labourers / contractors</h2>${table(['Name','Trade / role','Payment basis','Agreed rate'],workerRows)}<h2>Construction progress — Overall: ${progress}%</h2>${table(['Construction stage','Completion'],stageRows)}<div class="foot"><div class="sign">Prepared by / Project manager</div><div class="sign">Checked / Approved by</div></div><script>window.onload=()=>setTimeout(()=>{window.focus();window.print()},500);<\/script></body></html>`;
+ w.document.open();w.document.write(report);w.document.close();
+};
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>
+ 
