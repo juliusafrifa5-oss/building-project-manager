@@ -2,328 +2,170 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Amoako Building Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMOAKO BUILDING MANAGER</title>
+
 <style>
-:root{--green:#174b3a;--light:#eef4f0;--line:#d8e1dc;--muted:#64736b}
 *{box-sizing:border-box}
-body{margin:0;background:#f5f7f6;color:#202820;font:15px Arial,sans-serif}
-header{background:var(--green);color:#fff;padding:22px max(18px,calc((100% - 1100px)/2))}
-header h1{margin:0;font-size:24px}header p{margin:7px 0 0;color:#dce9e2}
-main{max-width:1100px;margin:22px auto;padding:0 16px}
-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-button,.button{border:0;border-radius:6px;padding:10px 14px;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
-button.secondary{background:#e5ece8;color:var(--green)}button.danger{background:#a83232}
-nav button.active{background:#0c3024}
-.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f3;
+  color:#26352d;
+}
+header{
+  background:#174b3a;
+  color:white;
+  padding:25px 18px;
+}
+header h1{margin:0;font-size:23px}
+header p{margin:8px 0 0;color:#d7e8df}
+main{max-width:1100px;margin:auto;padding:18px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+button{
+  border:0;
+  padding:11px 15px;
+  border-radius:6px;
+  background:#174b3a;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:hover{opacity:.88}
+.secondary{background:#e2ece6;color:#174b3a}
+.danger{background:#a52c2c}
+nav button.active{background:#092f22}
+.panel{
+  display:none;
+  background:white;
+  border-radius:10px;
+  padding:18px;
+  border:1px solid #dce5df;
+  margin-bottom:18px;
+}
 .panel.active{display:block}
-h2{color:var(--green);font-size:19px;margin:0 0 15px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.card{border:1px solid var(--line);border-radius:8px;padding:15px;background:#fff}
-.card span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
-.card strong{font-size:22px;color:var(--green);overflow-wrap:anywhere}
-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0 20px}
-label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#43534a}
-input,select,textarea{width:100%;padding:10px;border:1px solid #bdcbc3;border-radius:6px;font:inherit;background:#fff;color:#202820}
-textarea{min-height:42px;resize:vertical}
-.form-actions{display:flex;align-items:end;gap:8px;flex-wrap:wrap}
+h2{color:#174b3a;font-size:20px;margin-top:0}
+h3{color:#174b3a}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:12px;
+}
+.card{
+  background:white;
+  border:1px solid #dce5df;
+  padding:17px;
+  border-radius:9px;
+}
+.card span{display:block;color:#68766e;font-size:13px}
+.card strong{
+  display:block;
+  color:#174b3a;
+  font-size:22px;
+  margin-top:9px;
+}
+form{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin:15px 0 22px;
+}
+label{font-size:13px;color:#43534a}
+input,select,textarea{
+  width:100%;
+  padding:11px;
+  margin-top:6px;
+  border:1px solid #cbd8d0;
+  border-radius:6px;
+  font-size:14px;
+}
+.form-buttons{display:flex;gap:8px;align-items:end}
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-th,td{border:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}
-th{background:var(--green);color:#fff}td.num{text-align:right;white-space:nowrap}
-.actions{white-space:nowrap}.actions button{padding:6px 9px;margin:2px;font-size:12px}
-.muted{color:var(--muted)}.notice{background:var(--light);padding:12px;border-radius:7px;margin:12px 0}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.progress-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(120px,2fr) 48px;gap:10px;align-items:center;margin:10px 0}
-progress{width:100%;height:15px;accent-color:var(--green)}
-footer{text-align:center;color:var(--muted);padding:24px;font-size:12px}
-@media(max-width:600px){header h1{font-size:20px}.panel{padding:13px}.card strong{font-size:19px}}
-@media print{body{background:#fff}header,nav,.no-print,footer{display:none!important}main{max-width:none;margin:0;padding:0}.panel{display:block!important;border:0;padding:0;break-inside:auto}.panel:not(#dashboard){break-before:page}h2{break-after:avoid}table{break-inside:auto}tr{break-inside:avoid}.table-wrap{overflow:visible}.cards{grid-template-columns:repeat(2,1fr)}}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  font-size:13px;
+}
+th,td{
+  border:1px solid #dce5df;
+  padding:10px;
+  text-align:left;
+}
+th{background:#174b3a;color:white}
+.num{text-align:right;white-space:nowrap}
+.actions{white-space:nowrap}
+.actions button{padding:6px;font-size:11px}
+.notice{
+  background:#edf5f0;
+  padding:13px;
+  border-radius:7px;
+  margin:15px 0;
+}
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}
+footer{
+  text-align:center;
+  color:#718078;
+  padding:25px;
+  font-size:12px;
+}
+@media print{
+  nav,.no-print,footer,header{display:none!important}
+  body{background:white}
+  main{padding:0;max-width:none}
+  .panel{display:block!important;border:0}
+  .panel:not(#dashboard){page-break-before:always}
+}
 </style>
 </head>
+
 <body>
+
 <header>
-  <h1>AMOAKO BUILDING MANAGER</h1>
-  <p>Building project financial, labour, materials and construction progress records</p>
+<h1>AMOAKO BUILDING MANAGER</h1>
+<p>Building Project Financial Management System</p>
 </header>
+
 <main>
-<nav class="no-print" aria-label="Main navigation">
-  <button class="active" data-tab="dashboard">Dashboard</button>
-  <button data-tab="investments">Investments</button>
-  <button data-tab="expenses">Expenditure</button>
-  <button data-tab="workers">Labourers</button>
-  <button data-tab="progress">Construction progress</button>
-  <button data-tab="backup">Backup &amp; report</button>
+
+<nav>
+<button class="active" onclick="showTab('dashboard',this)">Dashboard</button>
+<button onclick="showTab('funds',this)">Sources of Funds</button>
+<button onclick="showTab('materials',this)">Materials</button>
+<button onclick="showTab('labour',this)">Labour</button>
+<button onclick="showTab('records',this)">All Records</button>
+<button onclick="showTab('reports',this)">Reports & Backup</button>
 </nav>
 
+<!-- DASHBOARD -->
+
 <section id="dashboard" class="panel active">
-  <h2>Financial summary</h2>
-  <div class="cards">
-    <div class="card"><span>Total investment</span><strong id="totalInvestment">GH₵ 0.00</strong></div>
-    <div class="card"><span>Total expenditure</span><strong id="totalExpense">GH₵ 0.00</strong></div>
-    <div class="card"><span>Available funds</span><strong id="availableFunds">GH₵ 0.00</strong></div>
-    <div class="card"><span>Overall construction progress</span><strong id="overallProgress">0%</strong></div>
-  </div>
-  <div class="notice">Your records are saved in this browser on this device. Use Backup &amp; report regularly to download a backup of your data.</div>
-  <h2>Recent transactions</h2><div id="recentTransactions" class="table-wrap"></div>
-  <h2>Construction stages</h2><div id="dashboardStages"></div>
-</section>
 
-<section id="investments" class="panel">
-  <h2>Investment records</h2>
-  <form id="investmentForm">
-    <input type="hidden" id="investmentId">
-    <label>Date<input type="date" id="invDate" required></label>
-    <label>Source<select id="invSource"><option>Susu</option><option>Remittance</option><option>Motor sales</option><option>Other</option></select></label>
-    <label>Contributor<input id="invContributor" placeholder="Contributor name"></label>
-    <label>Description<input id="invDescription" placeholder="Purpose or details"></label>
-    <label>Amount (GH₵)<input type="number" id="invAmount" min="0" step="0.01" required></label>
-    <label>Notes<input id="invNotes" placeholder="Optional notes"></label>
-    <div class="form-actions"><button type="submit">Save investment</button><button type="button" class="secondary" onclick="resetForm('investmentForm')">Clear</button></div>
-  </form>
-  <div id="investmentTable" class="table-wrap"></div>
-</section>
+<h2>Financial Overview</h2>
 
-<section id="expenses" class="panel">
-  <h2>Expenditure records</h2>
-  <form id="expenseForm">
-    <input type="hidden" id="expenseId">
-    <label>Date<input type="date" id="expDate" required></label>
-    <label>Category<select id="expKind"><option>Materials</option><option>Labour</option><option>Other</option></select></label>
-    <label>Item / description<input id="expItem" required placeholder="e.g. Cement, sand, mason payment"></label>
-    <label>Quantity<input type="number" id="expQty" min="0" step="any" placeholder="Optional"></label>
-    <label>Unit<input id="expUnit" placeholder="bags, trips, pieces..."></label>
-    <label>Recipient / payee<input id="expPayee" placeholder="Supplier or person paid"></label>
-    <label>Amount (GH₵)<input type="number" id="expAmount" min="0" step="0.01" required></label>
-    <label>Notes<input id="expNotes" placeholder="Optional notes"></label>
-    <div class="form-actions"><button type="submit">Save expense</button><button type="button" class="secondary" onclick="resetForm('expenseForm')">Clear</button></div>
-  </form>
-  <div id="expenseTable" class="table-wrap"></div>
-</section>
+<div class="cards">
 
-<section id="workers" class="panel">
-  <h2>Registered labourers / contractors</h2>
-  <form id="workerForm">
-    <input type="hidden" id="workerId">
-    <label>Name<input id="workerName" required></label>
-    <label>Trade / role<input id="workerTrade" placeholder="Mason, carpenter, electrician..."></label>
-    <label>Payment basis<input id="workerBasis" placeholder="Daily, weekly, contract..."></label>
-    <label>Agreed rate (GH₵)<input type="number" id="workerRate" min="0" step="0.01"></label>
-    <div class="form-actions"><button type="submit">Save labourer</button><button type="button" class="secondary" onclick="resetForm('workerForm')">Clear</button></div>
-  </form>
-  <div id="workerTable" class="table-wrap"></div>
-</section>
+<div class="card">
+<span>Total Money Invested</span>
+<strong id="totalFunds">GH₵ 0.00</strong>
+</div>
 
-<section id="progress" class="panel">
-  <h2>Construction progress</h2>
-  <form id="stageForm">
-    <input type="hidden" id="stageId">
-    <label>Construction stage<input id="stageName" required placeholder="e.g. Foundation blockwork"></label>
-    <label>Completion (%)<input id="stagePercent" type="number" min="0" max="100" step="1" required></label>
-    <div class="form-actions"><button type="submit">Save stage</button><button type="button" class="secondary" onclick="resetForm('stageForm')">Clear</button></div>
-  </form>
-  <div id="stageTable" class="table-wrap"></div>
-</section>
+<div class="card">
+<span>Total Material Cost</span>
+<strong id="materialTotal">GH₵ 0.00</strong>
+</div>
 
-<section id="backup" class="panel">
-  <h2>Backup, restore and professional report</h2>
-  <p>Print the report and choose “Save as PDF” in your browser's print options.</p>
-  <div class="toolbar no-print">
-    <button id="printReport">Print / Save PDF report</button>
-    <button class="secondary" id="exportData">Download data backup</button>
-    <label class="button" for="importFile">Restore backup JSON</label>
-    <input id="importFile" type="file" accept="application/json,.json" hidden>
-  </div>
-  <div class="notice">The PDF report includes the financial summary, investment breakdown, expense breakdown, detailed transactions, labourers and construction stages.</div>
-  <button class="danger no-print" id="clearData">Clear all application data</button>
-  <p class="muted">Warning: clearing data cannot be undone unless you have downloaded a backup.</p>
-</section>
-</main>
-<footer>Amoako Building Manager · Building Project Records · GH₵</footer>
+<div class="card">
+<span>Total Labour Cost</span>
+<strong id="labourTotal">GH₵ 0.00</strong>
+</div>
 
-<script>
-(() => {
-'use strict';
-const STORAGE_KEY = 'amoakoBuildingManagerData_v1';
-const today = new Date().toISOString().slice(0,10);
-const emptyData = () => ({investments:[], entries:[], workers:[], stages:[]});
-let data = loadData();
+<div class="card">
+<span>Total Expenditure</span>
+<strong id="totalSpent">GH₵ 0.00</strong>
+</div>
 
-function loadData(){
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return emptyData();
-    const parsed = JSON.parse(saved);
-    return {
-      investments:Array.isArray(parsed.investments)?parsed.investments:[],
-      entries:Array.isArray(parsed.entries)?parsed.entries:[],
-      workers:Array.isArray(parsed.workers)?parsed.workers:[],
-      stages:Array.isArray(parsed.stages)?parsed.stages:[]
-    };
-  } catch(e){ console.error(e); return emptyData(); }
-}
-function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); renderAll(); }
-function id(){ return (crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(16).slice(2)); }
-function money(v){ return 'GH₵ '+Number(v||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function esc(v){ return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function sum(list){ return list.reduce((s,x)=>s+Number(x.amount||0),0); }
-function overall(){ return data.stages.length ? Math.round(data.stages.reduce((s,x)=>s+Number(x.percent||0),0)/data.stages.length) : 0; }
-function table(headers, rows){ return `<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="'+headers.length+'">No records yet.</td></tr>'}</tbody></table>`; }
-function actionButtons(type, recordId){ return `<span class="actions"><button type="button" class="secondary" data-edit="${type}" data-id="${esc(recordId)}">Edit</button><button type="button" class="danger" data-delete="${type}" data-id="${esc(recordId)}">Delete</button></span>`; }
-
-function renderAll(){
-  const invested=sum(data.investments), spent=sum(data.entries);
-  document.getElementById('totalInvestment').textContent=money(invested);
-  document.getElementById('totalExpense').textContent=money(spent);
-  document.getElementById('availableFunds').textContent=money(invested-spent);
-  document.getElementById('overallProgress').textContent=overall()+'%';
-
-  document.getElementById('investmentTable').innerHTML=table(
-    ['Date','Source','Contributor','Description','Amount','Notes','Actions'],
-    data.investments.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.source)}</td><td>${esc(x.contributor)}</td><td>${esc(x.description)}</td><td class="num">${money(x.amount)}</td><td>${esc(x.notes)}</td><td>${actionButtons('investment',x.id)}</td></tr>`).join('')
-  );
-
-  document.getElementById('expenseTable').innerHTML=table(
-    ['Date','Category','Item','Quantity','Payee','Amount','Notes','Actions'],
-    data.entries.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.kind)}</td><td>${esc(x.item)}</td><td>${esc(x.qty)} ${esc(x.unit)}</td><td>${esc(x.payee)}</td><td class="num">${money(x.amount)}</td><td>${esc(x.notes)}</td><td>${actionButtons('expense',x.id)}</td></tr>`).join('')
-  );
-
-  document.getElementById('workerTable').innerHTML=table(
-    ['Name','Trade / role','Payment basis','Agreed rate','Actions'],
-    data.workers.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.trade)}</td><td>${esc(x.basis)}</td><td class="num">${money(x.rate)}</td><td>${actionButtons('worker',x.id)}</td></tr>`).join('')
-  );
-
-  document.getElementById('stageTable').innerHTML=table(
-    ['Construction stage','Completion','Actions'],
-    data.stages.map(x=>`<tr><td>${esc(x.name)}</td><td>${Number(x.percent||0)}%</td><td>${actionButtons('stage',x.id)}</td></tr>`).join('')
-  );
-
-  document.getElementById('dashboardStages').innerHTML=data.stages.length
-    ? data.stages.map(x=>`<div class="progress-row"><span>${esc(x.name)}</span><progress max="100" value="${Math.min(100,Math.max(0,Number(x.percent)||0))}"></progress><b>${Number(x.percent)||0}%</b></div>`).join('')
-    : '<p class="muted">No construction stages entered.</p>';
-
-  const recent=[
-    ...data.investments.map(x=>({...x,recordType:'Investment',label:x.source})),
-    ...data.entries.map(x=>({...x,recordType:'Expense',label:x.item}))
-  ].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,8);
-
-  document.getElementById('recentTransactions').innerHTML=table(
-    ['Date','Type','Details','Amount'],
-    recent.map(x=>`<tr><td>${esc(x.date)}</td><td>${x.recordType}</td><td>${esc(x.label)}</td><td class="num">${money(x.amount)}</td></tr>`).join('')
-  );
-}
-
-function resetForm(formId){
-  const f=document.getElementById(formId);
-  f.reset();
-  const hidden=f.querySelector('input[type=hidden]');
-  if(hidden)hidden.value='';
-  const date=f.querySelector('input[type=date]');
-  if(date)date.value=today;
-}
-window.resetForm=resetForm;
-
-function value(id){return document.getElementById(id).value.trim();}
-
-function bindForm(formId, hiddenId, collection, fields, map){
-  document.getElementById(formId).addEventListener('submit',e=>{
-    e.preventDefault();
-    const record={id:value(hiddenId)||id()};
-    fields.forEach(k=>{
-      const config=map[k];
-      if(typeof config==='function')record[k]=config(value(k));
-      else record[k]=value(config.id);
-    });
-    const index=data[collection].findIndex(x=>x.id===record.id);
-    if(index>=0)data[collection][index]=record;
-    else data[collection].push(record);
-    saveData();
-    resetForm(formId);
-  });
-}
-
-bindForm('investmentForm','investmentId','investments',
-  ['date','source','contributor','description','amount','notes'],
-  {
-    date:{id:'invDate'},
-    source:{id:'invSource'},
-    contributor:{id:'invContributor'},
-    description:{id:'invDescription'},
-    amount:v=>Number(v||0),
-    notes:{id:'invNotes'}
-  }
-);
-
-bindForm('expenseForm','expenseId','entries',
-  ['date','kind','item','qty','unit','payee','amount','notes'],
-  {
-    date:{id:'expDate'},
-    kind:{id:'expKind'},
-    item:{id:'expItem'},
-    qty:{id:'expQty'},
-    unit:{id:'expUnit'},
-    payee:{id:'expPayee'},
-    amount:v=>Number(v||0),
-    notes:{id:'expNotes'}
-  }
-);
-
-bindForm('workerForm','workerId','workers',
-  ['name','trade','basis','rate'],
-  {
-    name:{id:'workerName'},
-    trade:{id:'workerTrade'},
-    basis:{id:'workerBasis'},
-    rate:v=>Number(v||0)
-  }
-);
-
-document.getElementById('stageForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const record={
-    id:value('stageId')||id(),
-    name:value('stageName'),
-    percent:Math.min(100,Math.max(0,Number(value('stagePercent')||0)))
-  };
-  const i=data.stages.findIndex(x=>x.id===record.id);
-  if(i>=0)data.stages[i]=record;
-  else data.stages.push(record);
-  saveData();
-  resetForm('stageForm');
-});
-
-function editRecord(type, recordId){
-  const collection={
-    investment:'investments',
-    expense:'entries',
-    worker:'workers',
-    stage:'stages'
-  }[type];
-
-  const x=data[collection].find(r=>r.id===recordId);
-  if(!x)return;
-
-  const mapping={
-    investment:{
-      form:'investmentForm',
-      id:'investmentId',
-      fields:{
-        date:'invDate',
-        source:'invSource',
-        contributor:'invContributor',
-        description:'invDescription',
-        amount:'invAmount',
-        notes:'invNotes'
-      }
-    },
-    expense:{
-      form:'expenseForm',
-      id:'expenseId',
-      fields:{
-        date:'expDate',
-        kind:'expKind',
-        item:'expItem',
-        qty:'expQty',
-        unit:'expUnit',
-        payee:'expPayee',
-        amount:'
+<div class="card">
+<span>Available Funds</span>
+<strong id="balance">GH₵ 0.00</strong>
+</
